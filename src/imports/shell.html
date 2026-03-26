@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>영업 대상 관리</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', 'Noto Sans KR', -apple-system, sans-serif; background: #F4F5F7; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+  /* ── Tier 1: 제목부 ── */
+  #app-title-bar { background: #1A1A1A; height: 52px; padding: 0 22px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .app-title { font-weight: 900; font-size: 17px; color: #E8470A; letter-spacing: 0.07em; }
+  .app-title-sep { color: #444; margin: 0 4px; }
+  .app-subtitle { color: #aaa; font-size: 12px; }
+  .db-badge { margin-left: auto; background: #2a2a2a; color: #9CA3AF; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 12px; border: 1px solid #333; }
+
+  /* ── Tier 2: 행사 칩 ── */
+  #event-chip-bar { background: #242424; padding: 0 14px; display: flex; align-items: center; gap: 8px; height: 44px; flex-shrink: 0; overflow-x: auto; }
+  .event-chip { padding: 5px 14px; border-radius: 20px; border: 1.5px solid #E8470A; background: #E8470A; color: #fff; font-weight: 700; font-size: 12px; cursor: pointer; white-space: nowrap; }
+  .event-chip:not(.active) { background: transparent; color: #6B7280; border-color: #333; }
+  .chip-placeholder { color: #4B5563; font-size: 12px; padding: 5px 12px; border: 1.5px dashed #333; border-radius: 20px; white-space: nowrap; }
+
+  /* ── Tier 3: 행사 상세바 ── */
+  #event-detail-bar { background: #fff; border-bottom: 1px solid #E5E7EB; padding: 0 18px; display: flex; align-items: center; gap: 14px; flex-shrink: 0; overflow-x: auto; flex-wrap: nowrap; min-height: 48px; }
+  .ev-season-pill { padding: 4px 12px; border-radius: 6px; border: 1.5px solid #E5E7EB; background: #F9FAFB; color: #374151; font-size: 11px; font-weight: 700; cursor: pointer; text-align: center; line-height: 1.3; white-space: nowrap; transition: all .12s; }
+  .ev-season-pill.active { background: #1A1A1A; color: #fff; border-color: #1A1A1A; }
+  .ev-season-date { font-size: 9px; font-weight: 400; opacity: 0.7; }
+  .ev-divider { width: 1px; height: 24px; background: #E5E7EB; flex-shrink: 0; }
+  .ev-perf-label { font-size: 9.5px; font-weight: 800; color: #9CA3AF; text-transform: uppercase; letter-spacing: .08em; white-space: nowrap; flex-shrink: 0; }
+  .ev-stat-item { display: flex; flex-direction: column; gap: 1px; align-items: center; white-space: nowrap; }
+  .ev-stat-label { font-size: 9px; color: #9CA3AF; font-weight: 700; }
+  .ev-stat-value { font-size: 12px; color: #E8470A; font-weight: 800; }
+  .stat-item { display: flex; gap: 5px; align-items: baseline; white-space: nowrap; }
+  .stat-label { font-size: 9.5px; color: #9CA3AF; font-weight: 700; }
+  .stat-value { font-size: 12.5px; color: #E8470A; font-weight: 700; }
+  .stat-value.purple { color: #7C3AED; }
+
+  /* ── 레이아웃 ── */
+  #main { display: flex; flex: 1; min-height: 0; overflow: hidden; }
+
+  /* ── 왼쪽 패널 ── */
+  #left { width: 500px; border-right: 1px solid #E5E7EB; background: #fff; display: flex; flex-direction: column; flex-shrink: 0; }
+  #btn-row { padding: 10px 13px; border-bottom: 1px solid #F3F4F6; display: flex; gap: 6px; }
+  .btn-outline { flex: 1; padding: 8px; background: #fff; border: 1.5px solid #E8470A; border-radius: 8px; cursor: pointer; color: #E8470A; font-weight: 700; font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+  .btn-solid { flex: 1; padding: 8px; background: linear-gradient(135deg, #E8470A, #F97316); border: none; border-radius: 8px; cursor: pointer; color: #fff; font-weight: 700; font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+  #search-box { padding: 10px 13px; border-bottom: 1px solid #F3F4F6; }
+  #search-box input { width: 100%; padding: 8px 10px; border: 1.5px solid #E5E7EB; border-radius: 7px; font-size: 12.5px; outline: none; }
+  #search-box input:focus { border-color: #E8470A; }
+  .filter-row { display: flex; gap: 5px; margin-top: 7px; }
+  .filter-row select { flex: 1; padding: 5px 6px; border: 1.5px solid #E5E7EB; border-radius: 6px; font-size: 11.5px; background: #F9FAFB; color: #374151; outline: none; }
+  #list-controls { display: flex; align-items: center; gap: 6px; padding: 5px 13px 7px; border-bottom: 1px solid #F3F4F6; flex-wrap: wrap; }
+  #count-label { font-size: 10px; color: #9CA3AF; white-space: nowrap; flex-shrink: 0; font-weight: 600; }
+  #sort-row { display: flex; gap: 4px; flex-wrap: wrap; padding: 0; }
+  .sort-btn { font-size: 10.5px; padding: 3px 8px; border-radius: 12px; border: 1px solid #E5E7EB; background: #fff; color: #6B7280; cursor: pointer; display: flex; align-items: center; gap: 3px; transition: all .12s; white-space: nowrap; }
+  .sort-btn:hover { border-color: #E8470A; color: #E8470A; }
+  .sort-btn.active { background: #1A1A1A; color: #fff; border-color: #1A1A1A; font-weight: 700; }
+  .sort-btn .arrow { font-size: 9px; opacity: 0.7; }
+  /* ── 별점 우선순위 ── */
+  .stars { display:flex; gap:1px; flex-shrink:0; }
+  .star  { font-size:9px; line-height:1; }
+  .star.on  { color:#F59E0B; }
+  .star.off { color:#E5E7EB; }
+
+  /* ── 점수 툴팁 (global fixed) ── */
+  .score-wrap { display: inline-flex; align-items: center; cursor: default; }
+  #global-score-tip { display: none; position: fixed; z-index: 9999; background: #1A1A1A; border-radius: 10px; padding: 10px 13px; min-width: 210px; box-shadow: 0 8px 28px rgba(0,0,0,0.4); pointer-events: none; }
+  #global-score-tip::after { content:''; position:absolute; right:12px; top:100%; border:5px solid transparent; border-top-color:#1A1A1A; }
+  .st-row { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 2.5px 0; font-size: 11px; color: #9CA3AF; }
+  .st-label { flex: 1; }
+  .st-pts { font-weight: 700; color: #34D399; white-space: nowrap; font-size: 11px; }
+  .st-pts.neg { color: #F87171; }
+  .st-divider { height: 1px; background: #333; margin: 6px 0; }
+  .st-total { display: flex; justify-content: space-between; align-items: center; gap: 14px; font-size: 12px; font-weight: 800; color: #fff; padding: 2px 0; }
+  .st-total-pts { color: #F97316; font-size: 13px; }
+
+  #contact-list { flex: 1; overflow-y: auto; min-height: 0; }
+  .contact-item { padding: 9px 13px; border-bottom: 1px solid #F9FAFB; cursor: pointer; border-left: 3px solid transparent; transition: background .1s; }
+  .contact-item:hover { background: #FFF9F7; }
+  .contact-item.active { background: #FFF4EE; border-left-color: #E8470A; }
+  .contact-item.is-new { background: #FAFFF4; border-left-color: #22C55E; }
+  .contact-item.active.is-new { background: #FFF4EE; border-left-color: #E8470A; }
+  .ci-top { display: flex; justify-content: space-between; gap: 4px; align-items: flex-start; }
+  .ci-name { font-weight: 600; font-size: 12px; color: #111827; }
+  .ci-company { font-size: 11px; color: #6B7280; margin-top: 2px; }
+  .ci-title { font-size: 10px; color: #9CA3AF; margin-top: 1px; }
+  .new-badge { font-size: 9px; background: #DCFCE7; color: #15803D; border-radius: 3px; padding: 1px 4px; margin-right: 4px; }
+  .type-badge { font-size: 9px; border-radius: 3px; padding: 1px 4px; white-space: nowrap; flex-shrink: 0; border: 1px solid; }
+
+  /* ── 오른쪽 패널 ── */
+  #right { flex: 1; overflow-y: auto; padding: 16px 20px; }
+
+  /* ── 초기 채점 기준 패널 ── */
+  .scoring-panel { max-width: 560px; margin: 0 auto; }
+  .sp-header { margin-bottom: 16px; }
+  .sp-title { font-size: 15px; font-weight: 800; color: #111827; display: flex; align-items: center; gap: 8px; }
+  .sp-subtitle { font-size: 11.5px; color: #9CA3AF; margin-top: 4px; }
+  .sp-hint { margin-top: 14px; background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 10px 14px; font-size: 11.5px; color: #6B7280; display: flex; align-items: center; gap: 8px; }
+  .sp-hint strong { color: #374151; }
+  .sp-block { background: #1A1A1A; border-radius: 9px; padding: 12px 14px; margin-bottom: 8px; }
+  .sp-block-title { font-size: 9.5px; font-weight: 800; color: #E8470A; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 8px; display: flex; justify-content: space-between; }
+  .sp-line { display: flex; align-items: center; gap: 8px; padding: 3.5px 0; border-bottom: 1px solid #2e2e2e; }
+  .sp-line:last-child { border-bottom: none; }
+  .sp-line-label { font-size: 10.5px; color: #D1D5DB; flex: 1; }
+  .sp-line-bar { flex: 0 0 80px; height: 3px; background: #333; border-radius: 2px; overflow: hidden; }
+  .sp-line-fill { height: 100%; border-radius: 2px; }
+  .sp-line-pts { font-size: 10.5px; font-weight: 700; min-width: 34px; text-align: right; }
+  .sp-grade-row { display: flex; gap: 8px; margin-top: 10px; }
+  .sp-grade-item { flex: 1; border-radius: 8px; padding: 8px 10px; text-align: center; }
+  .sp-grade-item .sg-label { font-size: 9.5px; font-weight: 700; margin-bottom: 3px; }
+  .sp-grade-item .sg-range { font-size: 11px; font-weight: 800; }
+  .sp-industry-note { background: #FFF9F7; border: 1.5px solid #E8470A22; border-radius: 8px; padding: 10px 14px; margin-top: 4px; margin-bottom: 8px; font-size: 11px; color: #374151; }
+  .sp-industry-note strong { color: #E8470A; }
+
+  /* 연락처 카드 */
+  .contact-card { background: #fff; border: 1px solid #E5E7EB; border-radius: 9px; padding: 14px 16px; margin-bottom: 12px; }
+  .cc-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .cc-name { font-weight: 700; font-size: 15px; color: #111827; }
+  .cc-company { color: #4B5563; font-size: 12px; margin-top: 2px; }
+  .cc-title { color: #9CA3AF; font-size: 11px; margin-top: 1px; }
+  .cc-meta { display: flex; gap: 10px; margin-top: 9px; flex-wrap: wrap; align-items: center; }
+  .cc-email, .cc-phone { font-size: 11px; color: #6B7280; }
+  .cc-note { font-size: 10.5px; color: #D97706; background: #FFFBEB; padding: 2px 6px; border-radius: 3px; border: 1px solid #FDE68A; }
+  .copy-mini { font-size: 9.5px; padding: 1px 5px; background: #F3F4F6; border: 1px solid #D1D5DB; border-radius: 3px; cursor: pointer; color: #374151; margin-left: 4px; }
+
+  /* 컨트롤 */
+  .section-label { font-size: 10.5px; font-weight: 700; color: #6B7280; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .controls-row { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; align-items: flex-start; }
+  .purpose-btns { flex: 1; min-width: 200px; }
+  .purpose-btns .btn-group { display: flex; gap: 5px; flex-wrap: wrap; }
+  .pill-btn { padding: 5px 11px; border-radius: 5px; border: 1.5px solid #E5E7EB; background: #fff; color: #6B7280; font-size: 12px; cursor: pointer; transition: all .12s; }
+  .season-picker .btn-group { display: flex; gap: 5px; }
+  .season-picker .pill-btn { font-size: 11.5px; line-height: 1.4; text-align: center; }
+  .lang-row { margin-bottom: 12px; }
+  .lang-row .btn-group { display: flex; gap: 5px; flex-wrap: wrap; }
+  .lang-btn { padding: 5px 12px; border-radius: 5px; font-size: 12px; cursor: pointer; border: 1.5px solid #E5E7EB; background: #fff; color: #6B7280; transition: all .12s; }
+  .lang-btn.active { border-color: #4338CA; background: #EEF2FF; color: #4338CA; font-weight: 700; }
+  .note-row { margin-bottom: 12px; }
+  .note-row-inner { display: flex; gap: 6px; align-items: center; }
+  .note-row input { flex: 1; padding: 8px 11px; border: 1.5px solid #E5E7EB; border-radius: 7px; font-size: 12.5px; outline: none; color: #1F2937; }
+  .note-row input:focus { border-color: #E8470A; }
+  .note-row input.has-value { border-color: #F97316; background: #FFFBEB; }
+  .btn-apply-note { padding: 8px 14px; background: #1A1A1A; color: #fff; border: none; border-radius: 7px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+  .btn-apply-note:hover { background: #E8470A; }
+  .btn-apply-note.applied { background: #059669; }
+
+  /* 이메일 출력 */
+  .email-box { background: #fff; border: 1.5px solid #E5E7EB; border-radius: 9px; overflow: hidden; }
+  .email-header { background: #F9FAFB; border-bottom: 1px solid #E5E7EB; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; }
+  .email-header span { font-weight: 700; font-size: 12.5px; color: #111827; }
+  .copy-all-btn { padding: 5px 14px; background: #E8470A; color: #fff; border: none; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 700; transition: background .15s; }
+  .copy-all-btn.done { background: #10B981; }
+  .email-body { padding: 13px 15px; }
+  .subject-row { display: flex; align-items: center; gap: 7px; margin-bottom: 11px; }
+  .row-label { font-size: 10px; font-weight: 700; color: #9CA3AF; width: 30px; flex-shrink: 0; }
+  .subject-box { flex: 1; background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 5px; padding: 6px 9px; font-size: 12.5px; font-weight: 600; color: #111827; display: flex; justify-content: space-between; align-items: center; gap: 7px; }
+  .body-row { display: flex; gap: 7px; }
+  .body-row .row-label { padding-top: 4px; }
+  .body-pre { background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 7px; padding: 11px 13px; font-size: 12px; line-height: 1.8; white-space: pre-wrap; font-family: inherit; color: #1F2937; margin: 0; width: 100%; }
+  .copy-body-btn { margin-top: 7px; padding: 5px 12px; background: #F3F4F6; border: 1px solid #D1D5DB; border-radius: 5px; font-size: 11.5px; cursor: pointer; color: #374151; }
+  .no-purpose { background: #FFF4EE; border: 1.5px dashed #E8470A; border-radius: 9px; padding: 18px; text-align: center; color: #9A3412; font-size: 13px; }
+
+  /* ── 모달 공통 ── */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .modal-box { background: #fff; border-radius: 14px; width: 100%; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+  .modal-header { padding: 16px 20px; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+  .modal-header h2 { font-weight: 700; font-size: 15px; color: #111827; }
+  .modal-header p { font-size: 11.5px; color: #9CA3AF; margin-top: 2px; }
+  .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: #9CA3AF; line-height: 1; }
+  .modal-body { flex: 1; overflow-y: auto; padding: 16px 20px; }
+  .modal-footer { padding: 12px 20px; border-top: 1px solid #E5E7EB; display: flex; gap: 8px; justify-content: flex-end; align-items: center; background: #FAFAFA; flex-shrink: 0; }
+
+  /* ── 수동 등록 모달 ── */
+  #add-modal .modal-box { max-width: 560px; max-height: 90vh; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .form-field label { font-size: 10.5px; font-weight: 700; color: #6B7280; display: block; margin-bottom: 3px; }
+  .form-field input, .form-field select { width: 100%; padding: 7px 9px; border: 1.5px solid #E5E7EB; border-radius: 6px; font-size: 12.5px; outline: none; color: #111827; background: #fff; }
+  .form-field input:focus, .form-field select:focus { border-color: #E8470A; }
+  .analyze-btn { width: 100%; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 13px; margin-bottom: 14px; transition: background .15s; }
+  .analyze-btn.ready { background: #1A1A1A; color: #fff; }
+  .analyze-btn.disabled { background: #E5E7EB; color: #9CA3AF; cursor: not-allowed; }
+
+  /* 분류 결과 */
+  .result-box { border: 1.5px solid; border-radius: 10px; overflow: hidden; }
+  .result-grade { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
+  .result-grade-label { font-weight: 700; font-size: 14px; }
+  .result-grade-desc { font-size: 11.5px; margin-top: 2px; opacity: 0.8; }
+  .result-score { text-align: right; }
+  .result-score .num { font-size: 26px; font-weight: 900; line-height: 1; }
+  .result-score .denom { font-size: 10px; opacity: 0.7; }
+  .result-detail { padding: 12px 16px; background: #fff; }
+  .result-reasons { margin-bottom: 12px; }
+  .reason-tag { font-size: 11px; background: #F3F4F6; color: #374151; padding: 3px 8px; border-radius: 10px; display: inline-block; margin: 2px; }
+  .result-role { border-radius: 8px; padding: 10px 12px; border: 1px solid; display: flex; align-items: center; justify-content: space-between; }
+  .role-label { font-size: 10.5px; font-weight: 700; color: #6B7280; margin-bottom: 3px; }
+  .role-name { font-weight: 700; font-size: 14px; }
+  .role-reason { font-size: 11px; margin-top: 2px; opacity: 0.8; }
+  .role-alts { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
+  .role-alt-btn { font-size: 10.5px; padding: 3px 8px; background: #fff; border-radius: 4px; cursor: pointer; border: 1px solid; }
+
+  .btn-cancel { padding: 7px 16px; background: #F3F4F6; border: 1px solid #D1D5DB; border-radius: 7px; cursor: pointer; font-size: 13px; color: #374151; }
+  .btn-add { padding: 7px 18px; background: #E8470A; color: #fff; border: none; border-radius: 7px; cursor: pointer; font-size: 13px; font-weight: 700; }
+  .btn-add.disabled { background: #E5E7EB; color: #9CA3AF; cursor: not-allowed; }
+  .recommend-note { display: flex; align-items: flex-start; gap: 8px; background: #FFF9F7; border: 1px solid #FED7AA; border-radius: 8px; padding: 9px 12px; margin-bottom: 10px; font-size: 11.5px; color: #374151; line-height: 1.5; }
+  .recommend-note .rn-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  /* ── 기관 접근방식 힌트 ── */
+  .approach-hint { display: flex; align-items: flex-start; gap: 8px; background: #F9FAFB; border: 1.5px solid #E5E7EB; border-radius: 8px; padding: 9px 13px; margin-bottom: 10px; font-size: 11.5px; color: #374151; line-height: 1.6; }
+  .approach-hint .ah-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .approach-hint-label { font-size: 9.5px; font-weight: 800; color: #9CA3AF; text-transform: uppercase; letter-spacing: .08em; display: block; margin-bottom: 2px; }
+  .approach-email-box { background: #F9FAFB; border: 1.5px dashed #D1D5DB; border-radius: 9px; padding: 20px; text-align: center; color: #9CA3AF; font-size: 12px; line-height: 1.8; }
+
+  /* ── 등급 필터 바 ── */
+  #grade-filter-bar { padding: 8px 13px 10px; border-bottom: 1px solid #F3F4F6; background: #FAFAFA; }
+  .gf-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px; }
+  .gf-label { font-size: 9.5px; font-weight: 800; color: #6B7280; text-transform: uppercase; letter-spacing: .08em; }
+  .scoring-btn { font-size: 9.5px; color: #9CA3AF; background: none; border: 1px solid #E5E7EB; border-radius: 4px; padding: 2px 7px; cursor: pointer; transition: all .1s; }
+  .scoring-btn:hover { color: #E8470A; border-color: #E8470A; }
+  .gf-chips { display: flex; flex-direction: column; gap: 5px; }
+  .gf-chips-row { display: flex; gap: 5px; }
+  .gf-chip-all { flex: 1; justify-content: center; }
+  .gf-chip { font-size: 11px; padding: 4px 10px; border-radius: 20px; border: 1.5px solid #E5E7EB; background: #fff; color: #6B7280; cursor: pointer; font-weight: 600; transition: all .12s; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+  .gf-chip:hover { border-color: #9CA3AF; }
+  .gf-chip .gf-cnt { font-size: 9.5px; opacity: .75; font-weight: 700; }
+  .gf-chip.active-all  { background: #1A1A1A; color: #fff; border-color: #1A1A1A; }
+  .gf-chip.active-high { background: #059669; color: #fff; border-color: #059669; }
+  .gf-chip.active-mid  { background: #D97706; color: #fff; border-color: #D97706; }
+  .gf-chip.active-low  { background: #DC2626; color: #fff; border-color: #DC2626; }
+
+  /* ── 가중치 편집 모달 ── */
+  #weight-editor-modal .modal-box { max-width: 500px; max-height: 88vh; }
+  .we-field { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid #F3F4F6; }
+  .we-field:last-child { border-bottom: none; }
+  .we-label { font-size: 11.5px; color: #374151; font-weight: 600; width: 130px; flex-shrink: 0; }
+  .we-input-wrap { flex: 1; display: flex; align-items: center; gap: 8px; }
+  .we-range { flex: 1; accent-color: #E8470A; cursor: pointer; }
+  .we-val { font-size: 12px; font-weight: 800; color: #E8470A; min-width: 26px; text-align: right; }
+  .we-section-label { font-size: 9.5px; font-weight: 800; color: #9CA3AF; text-transform: uppercase; letter-spacing: .08em; padding: 10px 0 4px; }
+  .we-reset-btn { font-size: 12px; padding: 7px 14px; background: #F3F4F6; border: 1px solid #D1D5DB; border-radius: 7px; cursor: pointer; color: #374151; }
+  .we-save-btn  { font-size: 12px; padding: 7px 18px; background: #E8470A; color: #fff; border: none; border-radius: 7px; cursor: pointer; font-weight: 700; }
+
+  /* 연락처 아이템 점수 표시 */
+  .ci-grade-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 2px; }
+  .ci-grade-dot.high { background: #10B981; }
+  .ci-grade-dot.mid  { background: #F59E0B; }
+  .ci-grade-dot.low  { background: #EF4444; }
+  .ci-score-num { font-size: 9.5px; font-weight: 800; color: #9CA3AF; }
+
+  /* ── 채점 기준 모달 ── */
+  #scoring-modal .modal-box { max-width: 460px; max-height: 85vh; }
+  .sc-block { background: #1A1A1A; border-radius: 9px; padding: 12px 14px; margin-bottom: 8px; }
+  .sc-block-title { font-size: 9.5px; font-weight: 800; color: #E8470A; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .sc-block-title span { color: #E8470A; }
+  .sc-line { display: flex; align-items: center; gap: 8px; padding: 3.5px 0; border-bottom: 1px solid #2e2e2e; }
+  .sc-line:last-child { border-bottom: none; }
+  .sc-line-label { font-size: 10.5px; color: #D1D5DB; flex: 1; }
+  .sc-line-bar { flex: 0 0 60px; height: 3px; background: #333; border-radius: 2px; overflow: hidden; }
+  .sc-line-fill { height: 100%; background: #E8470A; border-radius: 2px; }
+  .sc-line-pts { font-size: 10.5px; font-weight: 700; color: #E8470A; min-width: 30px; text-align: right; }
+  .sc-grade-row { display: flex; gap: 8px; margin-top: 10px; }
+  .sc-grade-item { flex: 1; border-radius: 8px; padding: 8px 10px; text-align: center; }
+  .sc-grade-item .sg-label { font-size: 9.5px; font-weight: 700; margin-bottom: 3px; }
+  .sc-grade-item .sg-range { font-size: 11px; font-weight: 800; }
+
+</style>
+</head>
+<body>
+
+<!-- 점수 툴팁 (전역, fixed) -->
+<div id="global-score-tip"></div>
+
+<!-- ── Tier 1: 제목부 ── -->
+<div id="app-title-bar">
+  <span class="app-title">섭외 DB 관리</span>
+  <span class="app-title-sep">|</span>
+  <span class="app-subtitle">전시별 섭외 적합도 분석 · 이메일 생성</span>
+  <span class="db-badge" id="db-count-badge">158명 DB</span>
+</div>
+
+<!-- ── Tier 2: 행사 칩 ── -->
+<div id="event-chip-bar">
+  <button class="event-chip active" id="chip-megazoo" onclick="selectEvent('megazoo')">🐾 MEGAZOO</button>
+  <button class="event-chip" id="chip-khf"     onclick="selectEvent('khf')">🏥 KHF</button>
+  <button class="event-chip" id="chip-kfarm"  onclick="selectEvent('kfarm')">🌱 KFARM</button>
+  <button class="event-chip" id="chip-gocaf"  onclick="selectEvent('gocaf')">🏕️ GOCAF</button>
+</div>
+
+<!-- ── Tier 3: 행사 상세 (동적) ── -->
+<div id="event-detail-bar"></div>
+
+<!-- ── 메인 ── -->
+<div id="main">
+
+  <!-- 왼쪽 -->
+  <div id="left">
+    <div id="btn-row">
+      <button class="btn-outline" onclick="openAddModal()">✏️ 직접 입력</button>
+      <button class="btn-solid" onclick="alert('명함 스캔 기능은 Anthropic API 키 연결 시 사용 가능합니다.')">📇 명함 스캔</button>
+    </div>
+    <div id="search-box">
+      <input type="text" id="search-input" placeholder="🔍  이름 · 회사 · 업종" oninput="renderList()">
+      <div class="filter-row">
+        <select id="filter-type" onchange="renderList()">
+          <option>전체</option><option>부스</option><option>바이어</option><option>미디어</option>
+        </select>
+        <select id="filter-country" onchange="renderList()"></select>
+      </div>
+      <div id="list-controls">
+        <span id="count-label"></span>
+        <div id="sort-row"></div>
+      </div>
+    </div>
+    <div id="grade-filter-bar">
+      <div class="gf-header">
+        <span class="gf-label" id="gf-show-label">📊 전시 적합도 필터</span>
+        <button class="scoring-btn" onclick="openWeightEditor()" style="color:#E8470A;border-color:#E8470A55">⚙️ 가중치 편집</button>
+      </div>
+      <div class="gf-chips" id="grade-filter-chips"></div>
+    </div>
+    <div id="contact-list"></div>
+  </div>
+
+  <!-- 오른쪽 -->
+  <div id="right">
+    <div id="empty-state"></div>
+    <div id="detail-panel" style="display:none;"></div>
+  </div>
+</div><!-- /main -->
+
+
+<!-- ── 채점 기준 모달 ── -->
+<div class="modal-overlay" id="scoring-modal" style="display:none;">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div><h2>📊 섭외 우선순위 채점 기준표</h2><p>선택 전시의 업종 가중치 기반 자동 채점 → 섭외 우선순위 산정</p></div>
+      <button class="modal-close" onclick="closeScoringModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="sc-block">
+        <div class="sc-block-title">👤 직함 <span>MAX 30pt</span></div>
+        <div class="sc-line"><span class="sc-line-label">대표 / CEO / Founder</span><div class="sc-line-bar"><div class="sc-line-fill" style="width:100%"></div></div><span class="sc-line-pts">+30</span></div>
+        <div class="sc-line"><span class="sc-line-label">이사 / Director / Manager</span><div class="sc-line-bar"><div class="sc-line-fill" style="width:67%"></div></div><span class="sc-line-pts">+20</span></div>
+        <div class="sc-line"><span class="sc-line-label">담당 / Specialist</span><div class="sc-line-bar"><div class="sc-line-fill" style="width:40%"></div></div><span class="sc-line-pts">+12</span></div>
+        <div class="sc-line"><span class="sc-line-label">기타</span><div class="sc-line-bar"><div class="sc-line-fill" style="width:27%"></div></div><span class="sc-line-pts">+8</span></div>
+      </div>
+      <div class="sc-block">
+        <div class="sc-block-title">🏢 업종 <span>MAX 40pt</span></div>
+        <div class="sc-line"><span class="sc-line-label">반려동품 / 펫케어</span><div class="sc-line-bar"><div class="sc-line-fill" style="width:100%"></div></div><span class="sc-line-pts">+40</span></div>
+        <div class="sc-line"><span class="sc-line-label">유통 / 무역</span><div class="sc-line-bar"><div class="sc-line-fill" style="width:75%"></div></div><span class="sc-line-pts">+30</span></div>
+        <div class="sc-line"><span class="sc-line-label">제약 / 수의</span><div class="sc-line-bar"><div class="sc-line-fill" style="width:63%"></div></div><span class="sc-line-pts">+25</span></div>
+        <div class="sc-line"><span class="sc-line-label">화장품</span><div class="sc-line-bar"><div class="sc-line-fill" style="width:55%"></div></div><span class="sc-line-pts">+22</span></div>
+        <div class="sc-line"><span class="sc-line-label">IT / 미디어 / 식품</span><div class="sc-line-bar"><div class="sc-line-fill" style="width:45%"></div></div><span class="sc-line-pts">+18</span></div>
+        <div class="sc-line"><span class="sc-line-label">전시 / 이벤트</span><div class="sc-line-bar"><div class="sc-line-fill" style="width:38%"></div></div><span class="sc-line-pts">+15</span></div>
+        <div class="sc-line"><span class="sc-line-label">기타</span><div class="sc-line-bar"><div class="sc-line-fill" style="width:8%"></div></div><span class="sc-line-pts">+3</span></div>
+      </div>
+      <div class="sc-block">
+        <div class="sc-block-title">📬 연락처 <span>MAX 25pt</span></div>
+        <div class="sc-line"><span class="sc-line-label">이메일 보유</span><div class="sc-line-bar"><div class="sc-line-fill" style="width:60%"></div></div><span class="sc-line-pts">+15</span></div>
+        <div class="sc-line"><span class="sc-line-label">전화번호 보유</span><div class="sc-line-bar"><div class="sc-line-fill" style="width:40%"></div></div><span class="sc-line-pts">+10</span></div>
+      </div>
+      <div class="sc-grade-row">
+        <div class="sc-grade-item" style="background:#ECFDF5;border:1.5px solid #6EE7B7">
+          <div class="sg-label" style="color:#065F46">🔥 높은 적합도</div>
+          <div class="sg-range" style="color:#059669">70점 이상</div>
+        </div>
+        <div class="sc-grade-item" style="background:#FFFBEB;border:1.5px solid #FCD34D">
+          <div class="sg-label" style="color:#92400E">⚡ 보통 적합도</div>
+          <div class="sg-range" style="color:#D97706">40 – 69점</div>
+        </div>
+        <div class="sc-grade-item" style="background:#FEF2F2;border:1.5px solid #FCA5A5">
+          <div class="sg-label" style="color:#991B1B">❌ 낮은 적합도</div>
+          <div class="sg-range" style="color:#DC2626">39점 이하</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 수동 등록 모달 ── -->
+<div class="modal-overlay" id="add-modal" style="display:none;">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div><h2>✏️ 신규 연락처 등록</h2><p>정보 입력 후 영업 적합도 분석을 실행해 보세요</p></div>
+      <button class="modal-close" onclick="closeAddModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-field"><label>이름 *</label><input id="f-name" placeholder="홍길동 (Hong Gil Dong)"></div>
+        <div class="form-field"><label>회사명 *</label><input id="f-company" placeholder="(주)펫브랜드"></div>
+        <div class="form-field"><label>직함</label><input id="f-title" placeholder="대표이사 / CEO"></div>
+        <div class="form-field"><label>이메일</label><input id="f-email" type="email" placeholder="email@company.com"></div>
+        <div class="form-field"><label>전화번호</label><input id="f-phone" placeholder="010-0000-0000"></div>
+        <div class="form-field"><label>국가</label>
+          <select id="f-country">
+            <option>한국</option><option>중국</option><option>일본</option><option>대만</option>
+            <option>태국</option><option>베트남</option><option>인도네시아</option><option>필리핀</option>
+            <option>싱가포르</option><option>홍콩</option><option>미국</option><option>유럽/기타</option>
+          </select>
+        </div>
+        <div class="form-field"><label>업종</label>
+          <select id="f-industry">
+            <option>반려동물/펫케어</option><option>유통/무역</option><option>IT/기술</option>
+            <option>미디어/언론</option><option>제약/의료</option><option>화장품</option>
+            <option>전시/이벤트</option><option>물류/로직스</option><option>식품/F&B</option><option>교육/연구</option>
+            <option>제조업/포장재</option><option>관광/숙박</option><option>기타</option>
+          </select>
+        </div>
+        <div class="form-field"><label>언어</label>
+          <select id="f-lang">
+            <option>한국어</option><option>영어</option><option>중국어</option><option>일본어</option>
+            <option>한국어/영어</option><option>영어/중국어</option><option>영어/일본어</option><option>기타</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-field" style="margin-bottom:14px;">
+        <label>특이사항 (선택)</label>
+        <input id="f-note" placeholder="예: 일본 바이어 네트워크 보유, 동결건조 제품 관심 등" style="width:100%;padding:7px 9px;border:1.5px solid #E5E7EB;border-radius:6px;font-size:12.5px;outline:none;">
+      </div>
+      <button id="analyze-btn" class="analyze-btn disabled" onclick="runClassify()">🔍 영업 적합도 분석</button>
+      <div id="classify-result" style="display:none;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeAddModal()">취소</button>
+      <button id="add-confirm-btn" class="btn-add disabled" onclick="confirmAdd()">등록</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 가중치 편집 모달 ── -->
+<div class="modal-overlay" id="weight-editor-modal" style="display:none;">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div><h2 id="we-title">업종 가중치 편집</h2><p>전시별 업종 중요도를 0–50점 사이에서 직접 설정하세요</p></div>
+      <button class="modal-close" onclick="closeWeightEditor()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="we-section-label">🏢 업종 가중치</div>
+      <div id="we-fields"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="we-reset-btn" onclick="resetWeights()">↺ 기본값으로</button>
+      <button class="we-save-btn"  onclick="saveWeights()">✓ 저장 및 재산정</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── 샘플 데이터 (Figma Make 디자인용 - 실제 데이터는 data.js) ─────────────
+const SHOWS = {
+  megazoo: {
+    id:'megazoo', name:'MEGAZOO 2026', emoji:'🐾', color:'#E8470A',
+    seasons:[
+      { key:'1', label:'S1 (Spring)', dates:'29–31 May 2026', venue:'KINTEX 2 (22,580㎡)' },
+      { key:'2', label:'S2 (Fall)',   dates:'20–22 Nov 2026', venue:'KINTEX 1 (42,930㎡)' }
+    ],
+    stats:{ visitors2025:"53,135", exhibitors2025:"579", booths2025:"1,175", matchMeetings:"843",
+            matchCompanies:"324", buyerCompanies:"111", consultationUSD:"29.2 Million USD",
+            database:"315,000", growthYoY:"+8.5%", overseasGrowth:"70%",
+            overseasVisitors2025:"4,082", countries2025:"40+" },
+    booth:{ spaceOnly:"USD 3,000", shellScheme:"USD 3,600" },
+    contact:{ tel:"+82-2-6121-6462", email:"megazoo.es@esgroup.net", web:"www.megazoo.co.kr/eng" },
+    market:{ size2027:"KRW 6.0 trillion", importUSD:"USD 337 million", importCountries:"45" }
+  },
+  gocaf: {
+    id:'gocaf', name:'GOCAF 2026', emoji:'🏕️', color:'#2D6A4F',
+    seasons:[ { key:'1', label:'KINTEX', dates:'23–25 May 2026', venue:'KINTEX, Ilsan' } ],
+    stats:{ visitors2025:"184,869", exhibitors2025:"1,052", booths2025:"7,644", matchMeetings:"—",
+            matchCompanies:"—", buyerCompanies:"—", consultationUSD:"—",
+            database:"—", growthYoY:"+1.5%", overseasGrowth:"—",
+            overseasVisitors2025:"—", countries2025:"—" },
+    booth:{ spaceOnly:"KRW 800,000/3㎡", shellScheme:"KRW 1,000,000/3㎡" },
+    contact:{ tel:"+82-2-6121-6388", email:"caf@esgroup.net", web:"www.gocaf.kr/eng" },
+    market:{ size2027:"KRW 4.69B", importUSD:"—", importCountries:"—" }
+  },
+  khf: {
+    id:'khf', name:'KHF 2026', emoji:'🏥', color:'#E8003D',
+    seasons:[ { key:'1', label:'KHF 2026', dates:'19–21 Aug 2026', venue:'COEX Hall C,D, Seoul' } ],
+    stats:{ visitors2025:"21,855", exhibitors2025:"300", booths2025:"470", matchMeetings:"103",
+            matchCompanies:"—", buyerCompanies:"—", consultationUSD:"—",
+            database:"—", growthYoY:"—", overseasGrowth:"—",
+            overseasVisitors2025:"—", countries2025:"33" },
+    booth:{ spaceOnly:"KRW 2,000,000/startup", shellScheme:"문의" },
+    contact:{ tel:"+82-2-6121-6462", email:"khf@esgroup.net", web:"www.k-hospital.org" },
+    market:{ size2027:"—", importUSD:"—", importCountries:"—" }
+  },
+  kfarm: {
+    id:'kfarm', name:'KFARM 2026', emoji:'🌱', color:'#2E7D32',
+    seasons:[
+      { key:'1', label:'충청', dates:'18–20 Jun 2026', venue:'OSCO, Cheongju' },
+      { key:'2', label:'수원', dates:'29–31 Oct 2026', venue:'Suwon Messe, Suwon' }
+    ],
+    stats:{ visitors2025:"—", exhibitors2025:"—", booths2025:"—", matchMeetings:"—",
+            matchCompanies:"—", buyerCompanies:"—", consultationUSD:"—",
+            database:"—", growthYoY:"—", overseasGrowth:"—",
+            overseasVisitors2025:"—", countries2025:"—" },
+    booth:{ spaceOnly:"문의", shellScheme:"문의" },
+    contact:{ tel:"+82-2-6121-6388", email:"kfarm@esgroup.net", web:"www.kfarm.co.kr" },
+    market:{ size2027:"—", importUSD:"—", importCountries:"—" }
+  },
+};
+const TYPE_COLORS = {
+  "부스":   {bg:"#EEF6FF",border:"#3B82F6",text:"#1D4ED8",label:"🏪 부스 참가"},
+  "바이어": {bg:"#FFF7ED",border:"#F97316",text:"#C2410C",label:"💼 바이어"},
+  "미디어": {bg:"#F0FDF4",border:"#22C55E",text:"#15803D",label:"📰 미디어"},
+  "":       {bg:"#F9FAFB",border:"#E5E7EB",text:"#9CA3AF",label:"🏛 기관"},
+};
+const FLAGS = {"한국":"🇰🇷","중국":"🇨🇳","일본":"🇯🇵","대만":"🇹🇼","태국":"🇹🇭","베트남":"🇻🇳","인도네시아":"🇮🇩","필리핀":"🇵🇭","싱가포르":"🇸🇬","홍콩":"🇭🇰"};
+
+// ── 샘플 명함 3개 (필드명은 data.js 와 동일) ──────────────────────────────
+let contacts = [
+  {id:1, name:"홍길동 (Gildong Hong)", company:"샘플컴퍼니", company_en:"Sample Company",
+   title:"대표이사 CEO", title_en:"CEO", email:"hong@sample.com",
+   phone:"010-1234-5678", lang:"한국어/영어", country:"한국",
+   industry:"반려동물/펫케어", type:"부스", score:0, note:"웹사이트: http://www.sample.com"},
+  {id:2, name:"Jane Smith", company:"Global Pets Ltd.", company_en:"Global Pets Ltd.",
+   title:"Marketing Director", title_en:"Marketing Director", email:"jane@globalpets.com",
+   phone:"+1-555-0199", lang:"영어", country:"기타",
+   industry:"반려동물/펫케어", type:"바이어", score:0, note:""},
+  {id:3, name:"김기자", company:"펫뉴스", company_en:"Pet News",
+   title:"기자", title_en:"Reporter", email:"reporter@petnews.co.kr",
+   phone:"010-9876-5432", lang:"한국어/영어", country:"한국",
+   industry:"미디어/언론", type:"미디어", score:0, note:""}
+];
+</script>
+<script>
+// ── 앱 로직 (데이터는 data.js 참조) ────────────────────────────────────────
+
+// ── 앱 상태 ───────────────────────────────────────────────────────────────
+let state = {
+  selected: null,
+  purpose: "",
+  event: "megazoo",
+  season: "1",
+  langOverride: "auto",
+  customNote: "",
+  classifyResult: null,
+  classifyOverrideType: null,
+};
+let sortKey = 'priority'; // 'name' | 'country' | 'priority' | 'type'
+let sortDir = 1; // 1 = asc, -1 = desc
+
+const SORT_OPTIONS = [
+  { key: 'priority', label: '섭외 우선순위', asc: '높은순', desc: '낮은순' },
+  { key: 'name',     label: '이름',         asc: 'A→Z',   desc: 'Z→A'   },
+  { key: 'country',  label: '국가',         asc: 'A→Z',   desc: 'Z→A'   },
+  { key: 'type',     label: '유형',         asc: '부스→미디어', desc: '미디어→부스' },
+];
+
+function setSort(key) {
+  if (sortKey === key) sortDir *= -1;
+  else { sortKey = key; sortDir = 1; }
+  renderSortRow();
+  renderList();
+}
+
+function renderSortRow() {
+  document.getElementById('sort-row').innerHTML = SORT_OPTIONS.map(o => {
+    const active = sortKey === o.key;
+    const arrow = active ? (sortDir === 1 ? '↑' : '↓') : '';
+    return `<button class="sort-btn${active?' active':''}" onclick="setSort('${o.key}')">
+      ${o.label}${active?` <span class="arrow">${arrow}</span>`:''}
+    </button>`;
+  }).join('');
+}
+
+// ── 분류 엔진 ─────────────────────────────────────────────────────────────
+// 전시별 업종 가중치
+const SHOW_WEIGHTS = {
+  megazoo:{ pet:40, trade:25, health:15, it:12, food:12, beauty:18, edu:6,  mfg:8,  media:12, camping:3,  other:3 },
+  gocaf:  { pet:35, trade:20, health:8,  it:12, food:20, beauty:8,  edu:5,  mfg:15, media:10, camping:40, other:4 },
+  khf:    { pet:5,  trade:8,  health:45, it:28, food:5,  beauty:5,  edu:18, mfg:5,  media:8,  camping:2,  other:2 },
+  kfarm:  { pet:12, trade:12, health:8,  it:20, food:30, beauty:3,  edu:12, mfg:18, media:5,  camping:5,  other:2 },
+};
+// 기본값 백업 (가중치 편집기 초기화에 사용)
+const DEFAULT_WEIGHTS = JSON.parse(JSON.stringify(SHOW_WEIGHTS));
+// 직함 가중치 (전시 공통)
+let TITLE_WEIGHTS = { ceo:30, director:20, specialist:12, other:8 };
+const DEFAULT_TITLE_WEIGHTS = { ...TITLE_WEIGHTS };
+// 연락처 가중치 (전시 공통)
+let CONTACT_WEIGHTS = { both:25, emailOnly:15, phoneOnly:15 };
+const DEFAULT_CONTACT_WEIGHTS = { ...CONTACT_WEIGHTS };
+
+function classifyContact(f) {
+  let score = 0; const reasons = []; const breakdown = [];
+  const t = ((f.title||"")+" "+(f.title_en||"")).toLowerCase();
+  const ind = (f.industry||"").toLowerCase();
+  const co = ((f.company||"")+" "+(f.company_en||"")).toLowerCase();
+  // 직함
+  let titlePts = 0, titleLabel = "";
+  if (/대표|ceo|사장|회장|president|founder|owner|representative/.test(t)) { titlePts=TITLE_WEIGHTS.ceo;        titleLabel="직함 — 대표/CEO";     reasons.push("의사결정권자"); }
+  else if (/이사|director|manager|본부장|부장|팀장|head|officer/.test(t))   { titlePts=TITLE_WEIGHTS.director;   titleLabel="직함 — 이사/Manager"; reasons.push("중간관리자"); }
+  else if (/담당|coordinator|executive|specialist|lecturer|professor/.test(t)){ titlePts=TITLE_WEIGHTS.specialist; titleLabel="직함 — 담당/Specialist"; reasons.push("실무 담당자"); }
+  else { titlePts=TITLE_WEIGHTS.other; titleLabel="직함 — 기타"; }
+  score += titlePts; breakdown.push({label: titleLabel, pts: titlePts});
+  // 업종
+  const w = SHOW_WEIGHTS[state.event] || SHOW_WEIGHTS.megazoo;
+  let indPts = 0, indLabel = "";
+  if (/반려동물|펫|pet/.test(ind))                                  { indPts=w.pet;          indLabel="업종 — 반려동물·펫";    reasons.push("핵심 타겟 업종"); }
+  else if (/유통|무역|distribution|trade|import|export|wholesale/.test(ind)) { indPts=w.trade; indLabel="업종 — 유통·무역";    reasons.push("유통/무역 업종"); }
+  else if (/의료|헬스|health|pharma|수의|bio|바이오/.test(ind))       { indPts=w.health;       indLabel="업종 — 헬스케어";       reasons.push("헬스케어 관련"); }
+  else if (/화장품|코스메틱|cosmet|beauty|미용|패션/.test(ind))        { indPts=w.beauty;       indLabel="업종 — 뷰티·코스메틱";  reasons.push("뷰티/코스메틱"); }
+  else if (/it|기술|tech|통신|robot|로봇|ai|digital/.test(ind))       { indPts=w.it;           indLabel="업종 — IT·기술";        reasons.push("IT/기술 업종"); }
+  else if (/미디어|언론|media|광고|방송/.test(ind))                    { indPts=w.media;        indLabel="업종 — 미디어·언론";    reasons.push("미디어 업종"); }
+  else if (/식품|food|건강|영양|농업|축산|farm/.test(ind))              { indPts=w.food;         indLabel="업종 — 식품·농업";      reasons.push("식품/농업 관련"); }
+  else if (/교육|연구|research|university/.test(ind))                 { indPts=w.edu;          indLabel="업종 — 교육·연구";      reasons.push("교육/연구"); }
+  else if (/제조|manufact|건설|construction/.test(ind))               { indPts=w.mfg;          indLabel="업종 — 제조·건설";      reasons.push("제조/건설업"); }
+  else if (/캠핑|아웃도어|camping|outdoor|등산|트레킹|hiking/.test(ind)||/캠핑|아웃도어|camping|outdoor/.test(co)) { indPts=(w.camping||0); indLabel="업종 — 캠핑·아웃도어"; reasons.push("캠핑/아웃도어"); }
+  else if (/전시|이벤트|expo|fair/.test(ind))                          { indPts=12;             indLabel="업종 — 전시·이벤트";    reasons.push("전시/이벤트"); }
+  else { indPts=w.other; indLabel="업종 — 기타"; reasons.push("관련도 낮은 업종"); }
+  score += indPts; breakdown.push({label: indLabel, pts: indPts});
+  // 연락처
+  let contPts = 0, contLabel = "";
+  if (f.email && f.phone) { contPts=CONTACT_WEIGHTS.both;      contLabel="연락처 — 이메일+전화"; reasons.push("이메일+전화 보유"); }
+  else if (f.email)        { contPts=CONTACT_WEIGHTS.emailOnly; contLabel="연락처 — 이메일만";    reasons.push("이메일 보유"); }
+  else if (f.phone)        { contPts=CONTACT_WEIGHTS.phoneOnly; contLabel="연락처 — 전화만";      reasons.push("전화번호 보유"); }
+  if (contPts) { score += contPts; breakdown.push({label: contLabel, pts: contPts}); }
+  // 100pt 상한
+  const rawScore = score;
+  if (rawScore > 100) breakdown.push({label: "100pt 상한 적용", pts: -(rawScore - 100)});
+  const grade = score>=70?"high":score>=40?"mid":"low";
+  let suggestedType="부스", typeReason="제품/서비스 직접 전시 → 부스 참가로 바이어·관람객과 대면 영업";
+
+  // ── 영업 목적 판정 (우선순위 순) ──────────────────────────────────────────
+  const orgInd = /협회|학회|연구소|재단|대학|병원|의원|공공|기관|정부|association|hospital|university|research|foundation|institute/.test(ind);
+  const orgCo  = /협회|학회|연구소|재단|대학|병원|의원|공공|기관|정부|association|hospital|university|research|foundation|institute/.test(co);
+
+  if (orgInd || orgCo) {
+    // 1순위: 기관성 연락처 → 영업 목적 없음, 접근방식 힌트만
+    suggestedType = "";
+    const oSrc = ind + " " + co;
+    if (/협회|학회|association/.test(oSrc))                           typeReason = "세미나 연사 또는 공식 협력기관 섭외 고려. 바이어 가능성은 대화 중 파악 권장.";
+    else if (/병원|의원|hospital/.test(oSrc))                         typeReason = "제품 구매 기관으로 바이어 가능성 문의 또는 세미나 연사 제안 고려.";
+    else if (/연구소|연구|research/.test(oSrc))                       typeReason = "세미나 연사 또는 전시 참관 초청 고려. 공동 연구·발표 제안도 가능.";
+    else if (/대학|university/.test(oSrc))                            typeReason = "세미나 연사 또는 참관 초청 고려.";
+    else if (/재단|공공|정부|기관|foundation|institute/.test(oSrc))   typeReason = "공식 후원기관 또는 협력기관 섭외 고려.";
+    else                                                               typeReason = "비영리·기관 성격 — 참관, 연사, 협력기관 방향으로 접근 고려.";
+
+  } else if (/미디어|언론|방송|잡지|magazine|media|influencer|content/.test(ind) ||
+             /기자|에디터|pd|reporter|journalist|editor|influencer|blogger|유튜버|youtuber|writer|작가/.test(t)) {
+    // 2순위: 미디어
+    suggestedType = "미디어"; typeReason = "언론·콘텐츠 관련 종사자 → 공식 미디어 파트너 또는 취재 초청 협력 적합";
+
+  } else if (/유통|무역|수입|수출|도매|trade|distribution|import|export|wholesale/.test(ind) ||
+             /buyer|purchasing|sourcing|구매|바이어/.test(t)) {
+    // 3순위: 바이어 (명확한 근거 있을 때만)
+    suggestedType = "바이어"; typeReason = "유통·무역 업종 또는 구매 담당 → 한국 제품 매입·해외 유통 목적의 바이어 가능성";
+
+  } else {
+    // 4순위: 부스 (제품·서비스 판매 업체 기본값)
+    if (/식품|food|건강|영양|농업|farm/.test(ind))         typeReason = "식품·원료 전시 및 바이어 유치 → 부스 참가 적합";
+    else if (/it|기술|tech|robot|ai|digital/.test(ind))   typeReason = "솔루션·서비스 시연 및 비즈매칭 → 부스 참가 적합";
+    else if (/반려동물|펫|pet/.test(ind))                  typeReason = "반려동물 제품·서비스 전시 → 부스 참가 적합";
+    else if (/의료|헬스|health|바이오|bio/.test(ind))      typeReason = "헬스케어 제품·솔루션 전시 → 부스 참가 적합";
+    else if (/화장품|뷰티|beauty|cosmet/.test(ind))        typeReason = "뷰티·코스메틱 제품 전시 → 부스 참가 적합";
+    else if (/제조|manufact/.test(ind))                    typeReason = "자사 제품 직접 전시 → 부스 참가로 바이어·관람객과 대면 영업";
+    // 그 외: 기본 문구 유지
+  }
+
+  return { score:Math.min(score,100), grade, reasons, breakdown, suggestedType, typeReason };
+}
+
+// ── 이메일 생성 ───────────────────────────────────────────────────────────
+function generateEmail(contact, purpose, season, customNote) {
+  const lang = contact.lang || "";
+  const isKo = lang.includes("한국어");
+  const isCn = lang.includes("중국어") && !isKo;
+  const isJp = lang.includes("일본어") && !isKo;
+  const ev = SHOWS[state.event] || SHOWS.megazoo;
+  const s = ev.seasons.find(x=>x.key===season) || ev.seasons[0];
+  const sL = season==="1" ? "Season 1" : "Season 2";
+  const flag = FLAGS[contact.country]||"🌏";
+  const nm = contact.name||"";
+  const dname = nm.includes("(") ? (isKo||isJp ? nm.split("(")[0].trim() : (nm.match(/\(([^)]+)\)/)||[,""])[1]||nm) : nm;
+  const hon = isKo ? (/대표|CEO|회장|Founder|President|Director|General Manager/.test(contact.title||"")?"대표님":"님") : "";
+  const greeting = isKo ? `안녕하세요, ${dname} ${hon},` : isJp ? `${dname} 様\n\nお世話になっております。${ev.name} 事務局でございます。` : `Dear ${dname},`;
+  const ko_note = contact.note ? `\n\n💡 특이사항: ${contact.note}가 있어 바이어 매칭 세션과 높은 시너지가 예상됩니다.` : "";
+  const en_note = contact.note ? `\n\n💡 Note: Given "${contact.note}", we see strong potential for our biz-matching sessions.` : "";
+  const cn_note = contact.note ? `\n\n备注：「${contact.note}」，相信与我们买家匹配项目能产生很大价值。` : "";
+  const jp_note = contact.note ? `\n\n※「${contact.note}」を踏まえ、バイヤーマッチングでのシナジーが期待できます。` : "";
+  const cm = customNote ? (isKo?`\n\n📝 메모: ${customNote}`:isJp?`\n\n📝 メモ：${customNote}`:isCn?`\n\n📝 备注：${customNote}`:`\n\n📝 Note: ${customNote}`) : "";
+  const C = ev.contact, ST = ev.stats, B = ev.booth;
+
+  // ── 헬퍼 ──────────────────────────────────────────────────────────────
+  // "—" 또는 빈 값이면 false
+  const hasV = v => v && v !== "—";
+
+  // 업종 멘트 — 기타이면 생략
+  const isGenericInd = !contact.industry || contact.industry === "기타";
+  const indKo = isGenericInd ? "" : `${contact.industry} 분야 `;
+  const indJp = isGenericInd ? "" : `${contact.industry} 分野でのご活躍に注目し、`;
+  const indEn = isGenericInd ? "" : `your work in the ${contact.industry} space `;
+
+  // 실적 블록 — 값이 있는 항목만 표시
+  const statsLinesKo = [
+    hasV(ST.visitors2025) && `• 총 방문객: ${ST.visitors2025}명${hasV(ST.growthYoY)?` (전년비 ${ST.growthYoY})`:""}`,
+    hasV(ST.overseasVisitors2025) && `• 해외 방문객: ${ST.overseasVisitors2025}명${hasV(ST.countries2025)?` (${ST.countries2025}개국)`:""}${hasV(ST.overseasGrowth)?` — 전년비 ${ST.overseasGrowth} 급증`:""}`,
+    hasV(ST.matchMeetings) && `• 비즈 매칭: ${ST.matchMeetings}건${hasV(ST.consultationUSD)?` / 상담액 ${ST.consultationUSD}`:""}`,
+  ].filter(Boolean);
+  const statsBlockKo = statsLinesKo.length ? `\n\n📊 ${ev.name} 실적\n${statsLinesKo.join("\n")}` : "";
+
+  const statsLinesJp = [
+    hasV(ST.visitors2025) && `• 総来場者：${ST.visitors2025}名${hasV(ST.growthYoY)?`（前年比${ST.growthYoY}増）`:""}`,
+    hasV(ST.overseasVisitors2025) && `• 海外来場者：${ST.overseasVisitors2025}名${hasV(ST.countries2025)?`（${ST.countries2025}ヶ国）`:""}${hasV(ST.overseasGrowth)?` — 前年比${ST.overseasGrowth}急増`:""}`,
+    hasV(ST.matchMeetings) && `• 商談：${ST.matchMeetings}件${hasV(ST.consultationUSD)?` / 相談総額：${ST.consultationUSD}`:""}`,
+  ].filter(Boolean);
+  const statsBlockJp = statsLinesJp.length ? `\n\n📊 ${ev.name} 実績\n${statsLinesJp.join("\n")}` : "";
+
+  const statsLinesEn = [
+    hasV(ST.visitors2025) && `• Total Visitors: ${ST.visitors2025}${hasV(ST.growthYoY)?` (${ST.growthYoY} YoY)`:""}`,
+    hasV(ST.overseasVisitors2025) && `• Overseas: ${ST.overseasVisitors2025} from ${hasV(ST.countries2025)?ST.countries2025+" countries":"multiple countries"}${hasV(ST.overseasGrowth)?` (${ST.overseasGrowth} surge)`:""}`,
+    hasV(ST.matchMeetings) && `• Biz-Matching: ${ST.matchMeetings} meetings${hasV(ST.consultationUSD)?` | ${ST.consultationUSD}`:""}`,
+  ].filter(Boolean);
+  const statsBlockEn = statsLinesEn.length ? `\n\n📊 ${ev.name} Performance\n${statsLinesEn.join("\n")}` : "";
+
+  const statsLinesCn = [
+    hasV(ST.visitors2025) && `• 参观者：${ST.visitors2025}${hasV(ST.growthYoY)?`（同比${ST.growthYoY}）`:""}`,
+    hasV(ST.overseasVisitors2025) && `• 海外：${ST.overseasVisitors2025}人${hasV(ST.countries2025)?` / ${ST.countries2025}国`:""}${hasV(ST.overseasGrowth)?`，同比+${ST.overseasGrowth}`:""}`,
+    hasV(ST.matchMeetings) && `• 商务配对：${ST.matchMeetings}场${hasV(ST.consultationUSD)?` / ${ST.consultationUSD}`:""}`,
+  ].filter(Boolean);
+  const statsBlockCn = statsLinesCn.length ? `\n\n📊 ${ev.name} 成绩\n${statsLinesCn.join("\n")}` : "";
+
+  // 비즈매칭 DB 블록 (DB 수치 있을 때만)
+  const bizKo = hasV(ST.database) ? `\n\n💼 Global Biz-Matching\n${ST.database}건 DB 기반 1:1 사전예약 미팅 (구매/OEM·ODM/유통/수출입 등)` : "";
+  const bizJp = hasV(ST.database) ? `\n\n💼 Biz-Matching\n${ST.database}件DB基盤の1:1事前予約商談（購買/OEM/販売代理/輸出入 等）` : "";
+  const bizEn = hasV(ST.database) ? `\n\n💼 Biz-Matching\n1:1 pre-scheduled meetings powered by our ${ST.database}-entry buyer database` : "";
+
+  // 서명 — 전시명 기반으로 통일
+  const sigKo = `${ev.name} 사무국\n📞 ${C.tel}  |  ✉️ ${C.email}  |  🌐 ${C.web}`;
+  const sigJp = `${ev.name} 事務局\n📞 ${C.tel}  |  ✉️ ${C.email}  |  🌐 ${C.web}`;
+  const sigEn = `${ev.name} Organizing Committee\n📞 ${C.tel}  |  ✉️ ${C.email}  |  🌐 ${C.web}`;
+  const sigCn = `${ev.name} 组委会\n📞 ${C.tel}  |  ✉️ ${C.email}`;
+
+  // ── 이메일 템플릿 ─────────────────────────────────────────────────────
+  if (purpose==="부스") {
+    if (isJp) return {
+      subject:`【${ev.name} ${sL}】${contact.company} 様 ブース出展のご案内`,
+      body:`${greeting}\n\n${indJp}**${ev.name} ${sL}** へのブース出展参加をご提案申し上げます。\n\n📅 開催概要\n• 会期：${s.dates}\n• 会場：${s.venue}\n• 主催：KPFA　|　主管：MESSE ESANG${statsBlockJp}${bizJp}\n\n💡 ブース出展費用\n• スペースのみ：${B.spaceOnly}　• シェルスキーム：${B.shellScheme}${jp_note}${cm}\n\nご検討よろしくお願い申し上げます。\n\n${sigJp}`
+    };
+    if (isKo) return {
+      subject:`[${ev.name} ${sL}] ${contact.company} 부스 참가 제안`,
+      body:`${greeting}\n\n${ev.name} 사무국입니다.\n\n${indKo ? `${contact.company}의 ${indKo}주목하여, ` : ""}**${ev.name} ${sL}** 부스 참가를 제안드립니다.\n\n📅 행사 개요\n• 일정: ${s.dates}\n• 장소: ${s.venue}\n• 주최: KPFA  |  주관: MESSE ESANG${statsBlockKo}${bizKo}\n\n💡 부스 참가 비용 안내\n• Space Only: ${B.spaceOnly}\n• Shell Scheme: ${B.shellScheme}${ko_note}${cm}\n\n${sigKo}`
+    };
+    if (isCn) return {
+      subject:`[${ev.name} ${sL}] 诚邀 ${contact.company} 洽谈参展事宜`,
+      body:`${greeting}\n\n诚邀贵公司洽谈参加 **${ev.name} ${sL}** 的展览事宜。\n\n📅 展会概况\n• 日期：${s.dates}\n• 场地：${s.venue}${statsBlockCn}\n\n💡 参展费用\n• Space Only：${B.spaceOnly}\n• Shell Scheme：${B.shellScheme}${cn_note}${cm}\n\n如有兴趣，欢迎联系。\n\n${sigCn}`
+    };
+    return {
+      subject:`[${ev.name} ${sL}] Booth Participation Proposal — ${contact.company}`,
+      body:`${greeting}\n\nI'm writing from the ${ev.name} organizing team.\n\nWe'd like to propose booth participation at **${ev.name} ${sL}** for ${contact.company}${indEn ? ` — we've been following ${indEn}and believe this would be a great fit` : ""}.\n\n📅 Show Details\n• Dates: ${s.dates}\n• Venue: ${s.venue}${statsBlockEn}${bizEn}${contact.country!=="한국"?`\n\n🌍 Full support available for international exhibitors from ${contact.country}.`:""}${en_note}${cm}\n\n💡 Booth Fees\n• Space Only: ${B.spaceOnly}\n• Shell Scheme: ${B.shellScheme}\n\nBest regards,\n${sigEn}`
+    };
+  }
+  if (purpose==="바이어") {
+    if (isJp) return {
+      subject:`【${ev.name} ${sL}】VIPバイヤーご招待`,
+      body:`${greeting}\n\n${indJp || ""}**${ev.name} ${sL}** VIPバイヤーとしてご招待申し上げます。\n\n📅 ${s.dates}  |  ${s.venue}\n\n🎯 VIP特典\n• 1:1事前予約商談（並ばず希望企業と直接面談）${hasV(ST.exhibitors2025)?`\n• ${ST.exhibitors2025}社カタログ事前閲覧`:""}${hasV(ST.database)?`\n• ${ST.database}件DB基盤マッチング`:""}${hasV(ST.matchMeetings)&&hasV(ST.consultationUSD)?`\n• 実績：${ST.consultationUSD} / ${ST.matchMeetings}件`:""}${jp_note}${cm}\n\nご参加のご意向をお知らせください。\n\n${sigJp}`
+    };
+    if (isKo) return {
+      subject:`[${ev.name} ${sL}] VIP 바이어 초청`,
+      body:`${greeting}\n\n${ev.name} 사무국입니다.\n\n${indKo ? `${contact.company}의 ${indKo}전문성을 고려하여,` : `${contact.company}께`} **${ev.name} ${sL}** VIP 바이어로 특별 초청드립니다.\n\n📅 ${s.dates}  |  ${s.venue}\n\n🎯 VIP 바이어 혜택\n• 1:1 사전 예약 미팅 (원하는 기업 선택, 대기 없이 바로 상담)${hasV(ST.exhibitors2025)?`\n• ${ST.exhibitors2025}개 참가사 카탈로그 사전 열람`:""}${hasV(ST.database)?`\n• ${ST.database}건 DB 기반 맞춤 매칭`:""}${hasV(ST.matchMeetings)?`\n• 실적: ${hasV(ST.consultationUSD)?ST.consultationUSD+" / ":""}${ST.matchMeetings}건`:""}${ko_note}${cm}\n\n참관 의향을 알려주시면 초청장을 발송합니다.\n\n${sigKo}`
+    };
+    return {
+      subject:`[${ev.name} ${sL}] VIP Buyer Invitation`,
+      body:`${greeting}\n\nI'm writing from the ${ev.name} organizing team.\n\nWe'd like to extend a special **VIP Buyer Invitation** to ${contact.company}${indEn ? `, given ${indEn}` : ""}.\n\n📅 ${s.dates}  |  ${s.venue}\n\n🎯 VIP Benefits\n• 1:1 pre-scheduled meetings — choose who you meet, no queuing${hasV(ST.exhibitors2025)?`\n• Early access to ${ST.exhibitors2025} exhibitor catalog`:""}${hasV(ST.database)?`\n• Smart matching backed by ${ST.database}-entry database`:""}${hasV(ST.matchMeetings)?`\n• ${hasV(ST.consultationUSD)?ST.consultationUSD+" in consultations across ":""}${ST.matchMeetings} meetings`:""}${contact.country!=="한국"?`\n• ${flag} Travel/logistics support for buyers from ${contact.country}`:""}${en_note}${cm}\n\nBest regards,\n${sigEn}`
+    };
+  }
+  // 미디어
+  if (isJp) return {
+    subject:`【${ev.name}】公式メディアパートナーシップのご提案 — ${contact.company} 様`,
+    body:`${greeting}\n\n${contact.company} 様の専門性を評価し、**${ev.name}** 公式メディアパートナーとしてのご協力をご提案いたします。\n\n📰 メディアパートナー特典\n• 独占取材・優先インタビュー調整\n• 公式写真・映像素材の提供\n• 公式資料へのロゴ掲載${cm}\n\n${sigJp}`
+  };
+  if (isKo) return {
+    subject:`[${ev.name}] 공식 미디어 파트너 협력 제안 — ${contact.company}`,
+    body:`${greeting}\n\n${ev.name} 사무국입니다.\n\n${contact.company}의 전문성을 높이 평가하여 **${ev.name} 공식 미디어 파트너**로 협력을 제안드립니다.\n\n📰 미디어 파트너 혜택\n• 전시회 전·중·후 독점 취재 및 보도자료 우선 제공\n• CEO·바이어 인터뷰 우선 배정\n• 공식 자료·SNS 미디어 파트너 로고 표기${cm}\n\n${sigKo}`
+  };
+  return {
+    subject:`[${ev.name}] Official Media Partnership — ${contact.company}`,
+    body:`${greeting}\n\nWe'd like to invite ${contact.company} as an **Official Media Partner** for **${ev.name}**.\n\n📰 Partner Benefits\n• Exclusive press access pre/during/post show\n• Priority CEO & buyer interview scheduling\n• Official photo/video assets + logo on all materials${cm}\n\nBest regards,\n${sigEn}`
+  };
+}
+
+// ── 유틸 ─────────────────────────────────────────────────────────────────
+function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function typeBadgeHtml(type) {
+  // type이 ""(기관) 이면 TYPE_COLORS[""] 사용, 없는 타입이면 부스 fallback
+  const tc = (type !== undefined && TYPE_COLORS[type]) ? TYPE_COLORS[type] : TYPE_COLORS["부스"];
+  return `<span class="type-badge" style="background:${tc.bg};color:${tc.text};border-color:${tc.border}">${tc.label}</span>`;
+}
+function copyText(text, btnId) {
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+    const orig = btn.textContent;
+    btn.textContent = "✓ 복사됨"; btn.classList.add("done");
+    setTimeout(()=>{ btn.textContent=orig; btn.classList.remove("done"); }, 2000);
+  });
+}
+
+function recommendNote() {
+  return '<div class="recommend-note"><span class="rn-icon">✨</span><span><strong>영업 목적으로 가장 적합한 내용을 추천해 드렸어요!</strong><br>원하시는 목적으로 변경도 가능합니다.</span></div>';
+}
+
+// ── 점수 툴팁 (global fixed) ──────────────────────────────────────────────
+function showScoreTip(el) {
+  const tip = document.getElementById('global-score-tip');
+  if (!tip) return;
+  const bdRaw = el.getAttribute('data-bd');
+  const sc    = el.getAttribute('data-sc');
+  if (!bdRaw) return;
+  let bd;
+  try { bd = JSON.parse(bdRaw); } catch(e) { return; }
+  tip.innerHTML =
+    bd.map(b=>`<div class="st-row"><span class="st-label">${b.label}</span><span class="st-pts${b.pts<0?' neg':''}">${b.pts>0?'+':''}${b.pts}pt</span></div>`).join('') +
+    `<div class="st-divider"></div><div class="st-total"><span>합계</span><span class="st-total-pts">${sc}pt</span></div>`;
+  const rect = el.getBoundingClientRect();
+  tip.style.display = 'block';
+  // 툴팁 너비 측정 후 위치 보정
+  const tw = tip.offsetWidth;
+  let left = rect.right - tw;
+  if (left < 4) left = 4;
+  tip.style.left = left + 'px';
+  tip.style.top  = (rect.top - tip.offsetHeight - 9) + 'px';
+}
+function hideScoreTip() {
+  const tip = document.getElementById('global-score-tip');
+  if (tip) tip.style.display = 'none';
+}
+
+// ── 초기화 ────────────────────────────────────────────────────────────────
+function init() {
+  // 국가 필터 옵션
+  const countries = ["전체",...new Set(contacts.map(c=>c.country))];
+  const sel = document.getElementById("filter-country");
+  sel.innerHTML = countries.map(c=>`<option>${esc(c)}</option>`).join("");
+  renderSortRow();
+  renderList();
+  // 페이지 진입 시 KHF가 선택된 상태로 시작 (renderEmptyState는 selectEvent 내부에서 호출됨)
+  selectEvent('megazoo');
+  renderGradeFilterChips();
+}
+
+function selectEvent(key) {
+  state.event = key;
+  state.season = "1";
+  // 칩 active 상태 업데이트
+  document.querySelectorAll('.event-chip').forEach(b => b.classList.remove('active'));
+  const chip = document.getElementById('chip-' + key);
+  if (chip) chip.classList.add('active');
+  // 등급 필터 라벨 업데이트
+  const ev = SHOWS[key] || SHOWS.megazoo;
+  const lbl = document.getElementById('gf-show-label');
+  if (lbl) lbl.textContent = `📊 ${ev.emoji} ${ev.name} 적합도`;
+  // 점수 캐시 초기화 후 재렌더
+  contacts.forEach(c => { c._score = undefined; c._grade = undefined; c._suggestedType = undefined; c._typeReason = undefined; c._breakdown = undefined; });
+  renderEventDetailBar();
+  renderGradeFilterChips();
+  renderList();
+  // 선택된 연락처 없을 때 채점 기준 갱신 (전시 전환 시 업종 가중치 반영)
+  if (!state.selected) renderEmptyState();
+}
+
+function setSeason(v) {
+  state.season = v;
+  renderEventDetailBar();
+  if (state.selected && state.purpose) renderDetail();
+}
+
+// ── 연락처 목록 렌더 ──────────────────────────────────────────────────────
+function renderList() {
+  const q = document.getElementById("search-input").value.toLowerCase();
+  const ft = document.getElementById("filter-type").value;
+  const fc = document.getElementById("filter-country").value;
+  let filtered = contacts.filter(c =>
+    (!q || c.name.toLowerCase().includes(q) || c.company.toLowerCase().includes(q) || (c.industry||"").toLowerCase().includes(q)) &&
+    (ft==="전체" || c.type===ft) &&
+    (fc==="전체" || c.country===fc)
+  );
+
+  // 등급 필터 적용
+  if (gradeFilter !== 'all') {
+    filtered = filtered.filter(c => {
+      if (c._grade === undefined) { const r = classifyContact(c); c._score = r.score; c._grade = r.grade; }
+      return c._grade === gradeFilter;
+    });
+  }
+
+  // 정렬
+  const TYPE_ORDER = {"부스":0,"바이어":1,"미디어":2,"":3};
+  filtered.sort((a, b) => {
+    let va, vb;
+    if (sortKey === 'priority') {
+      if (a._score === undefined) { const ra = classifyContact(a); a._score = ra.score; a._grade = ra.grade; }
+      if (b._score === undefined) { const rb = classifyContact(b); b._score = rb.score; b._grade = rb.grade; }
+      return (b._score - a._score) * sortDir;
+    } else if (sortKey === 'name') {
+      va = a.name.replace(/\(.*\)/,'').trim();
+      vb = b.name.replace(/\(.*\)/,'').trim();
+      return va.localeCompare(vb, 'ko') * sortDir;
+    } else if (sortKey === 'country') {
+      va = a.country; vb = b.country;
+      return va.localeCompare(vb, 'ko') * sortDir;
+    } else if (sortKey === 'type') {
+      va = TYPE_ORDER[a.type] ?? 9;
+      vb = TYPE_ORDER[b.type] ?? 9;
+      return (va - vb) * sortDir;
+    }
+    return 0;
+  });
+  const shown = filtered.length, total = contacts.length;
+  document.getElementById("count-label").textContent = `${shown}/${total}명`;
+  document.getElementById("contact-count") && (document.getElementById("contact-count").textContent = total + "명");
+
+  // 별점: score → 1~5성 (70↑=5, 60↑=4, 45↑=3, 30↑=2, else=1)
+  function scoreToStars(score) {
+    return score>=70?5 : score>=60?4 : score>=45?3 : score>=30?2 : 1;
+  }
+  function starsHtml(n) {
+    return `<span class="stars">${[1,2,3,4,5].map(i=>`<span class="star ${i<=n?'on':'off'}">${i<=n?'★':'★'}</span>`).join('')}</span>`;
+  }
+
+  renderGradeFilterChips();
+  document.getElementById("contact-list").innerHTML = filtered.map(c => renderContactItem(c)).join("");
+}
+
+function renderContactItem(c) {
+  const active = state.selected && state.selected.id===c.id;
+  // _suggestedType 없으면 계산 후 캐싱
+  if (c._score === undefined) { const r = classifyContact(c); c._score = r.score; c._grade = r.grade; c._suggestedType = r.suggestedType; c._typeReason = r.typeReason; c._breakdown = r.breakdown; }
+  // 기관(suggestedType==="")이면 뱃지 숨김, 아니면 추천 타입 표시
+  const badge = (c._suggestedType === "") ? "" : typeBadgeHtml(c._suggestedType !== undefined ? c._suggestedType : c.type);
+  const gr = c._grade;
+  const sc = c._score;
+  const dotClass = {high:'high',mid:'mid',low:'low'}[gr]||'';
+  // breakdown을 data 속성에 JSON으로 저장 → 글로벌 툴팁에서 읽음
+  const bdData = (c._breakdown && c._breakdown.length) ? esc(JSON.stringify(c._breakdown)) : "";
+  return `<div class="contact-item${active?" active":""}${c._new?" is-new":""}" onclick="selectContact(${c.id})">
+    <div class="ci-top">
+      <div class="ci-name">${c._new?'<span class="new-badge">NEW</span>':''}${esc(FLAGS[c.country]||"🌏")} ${esc(c.name||c.company)}</div>
+      <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+        <span class="ci-grade-dot ${dotClass}" title="${{high:'높은 적합도',mid:'보통 적합도',low:'낮은 적합도'}[gr]||''}"></span>
+        <div class="score-wrap" data-bd="${bdData}" data-sc="${sc}"
+          onmouseenter="showScoreTip(this)" onmouseleave="hideScoreTip()">
+          <span class="ci-score-num">${sc}pt</span>
+        </div>
+        ${badge}
+      </div>
+    </div>
+    <div class="ci-company">${esc(c.company)}</div>
+    ${c.title?`<div class="ci-title">${esc(c.title)}</div>`:""}
+  </div>`;
+}
+
+function renderGradeFilterChips() {
+  const all = contacts;
+  // _score, _grade 모두 캐싱 (정렬에도 사용됨)
+  all.forEach(c => {
+    if (c._score === undefined) { const r = classifyContact(c); c._score = r.score; c._grade = r.grade; c._suggestedType = r.suggestedType; c._typeReason = r.typeReason; c._breakdown = r.breakdown; }
+  });
+  const high = all.filter(c => c._grade === 'high').length;
+  const mid  = all.filter(c => c._grade === 'mid').length;
+  const low  = all.filter(c => c._grade === 'low').length;
+  const el = document.getElementById('grade-filter-chips');
+  if (!el) return;
+  const makeChip = (key, label, cnt, cls, extraClass='') =>
+    `<button class="gf-chip${gradeFilter===key?' '+cls:''}${extraClass?' '+extraClass:''}" onclick="setGradeFilter('${key}')">${label} <span class="gf-cnt">${cnt}</span></button>`;
+  el.innerHTML = `
+    <div class="gf-chips-row">
+      ${makeChip('all','전체',all.length,'active-all','gf-chip-all')}
+      ${makeChip('high','🔥 높은 적합도',high,'active-high')}
+      ${makeChip('mid','⚡ 보통',mid,'active-mid')}
+      ${makeChip('low','❌ 낮음',low,'active-low')}
+    </div>`;
+}
+
+function selectContact(id) {
+  const c = contacts.find(x=>x.id===id);
+  if (!c) return;
+  // 같은 연락처 재클릭 시 → 선택 해제, 채점 기준 화면으로 복귀
+  if (state.selected && state.selected.id === id) {
+    state.selected = null;
+    state.purpose = "";
+    document.getElementById("detail-panel").style.display = "none";
+    renderEmptyState();
+    renderList();
+    return;
+  }
+  state.selected = c;
+  // 캐시된 AI 추천 유형 우선, 없으면 저장된 type
+  if (c._score === undefined) { const r = classifyContact(c); c._score = r.score; c._grade = r.grade; c._suggestedType = r.suggestedType; c._typeReason = r.typeReason; c._breakdown = r.breakdown; }
+  state.purpose = c._suggestedType || c.type;
+  state.langOverride = "auto";
+  state.customNote = "";
+  document.getElementById("empty-state").style.display = "block";
+  document.getElementById("empty-state").innerHTML = "";
+  document.getElementById("detail-panel").style.display = "block";
+  document.getElementById("empty-state").style.display = "none";
+  renderList();
+  renderDetail();
+}
+
+function renderEmptyState() {
+  const el = document.getElementById("empty-state");
+  if (!el) return;
+  el.style.display = "block";
+  const ev = SHOWS[state.event] || SHOWS.megazoo;
+  const w = SHOW_WEIGHTS[state.event] || SHOW_WEIGHTS.megazoo;
+
+  // 업종 가중치를 내림차순 정렬하여 전시별 실제 가중치 표시 (캠핑 포함)
+  const industries = [
+    { key:'pet',     label: '반려동물 / 펫케어',  pts: w.pet     ?? 0 },
+    { key:'health',  label: '의료 / 헬스케어',    pts: w.health  ?? 0 },
+    { key:'it',      label: 'IT / 기술',          pts: w.it      ?? 0 },
+    { key:'trade',   label: '유통 / 무역',        pts: w.trade   ?? 0 },
+    { key:'beauty',  label: '뷰티 / 코스메틱',    pts: w.beauty  ?? 0 },
+    { key:'food',    label: '식품 / 농업',        pts: w.food    ?? 0 },
+    { key:'edu',     label: '교육 / 연구',        pts: w.edu     ?? 0 },
+    { key:'mfg',     label: '제조 / 건설',        pts: w.mfg     ?? 0 },
+    { key:'media',   label: '미디어 / 언론',      pts: w.media   ?? 0 },
+    { key:'camping', label: '캠핑 / 아웃도어',    pts: w.camping ?? 0 },
+    { key:'other',   label: '기타',               pts: w.other   ?? 0 },
+  ].sort((a, b) => b.pts - a.pts);
+
+  const maxPts = industries[0].pts;
+
+  // GOCAF 반려동물 가중치 설명 노트
+  const gocafPetNote = (state.event === 'gocaf')
+    ? `<div style="background:#FFF9F7;border:1px solid #E8470A33;border-radius:6px;padding:7px 10px;margin-top:5px;font-size:10.5px;color:#6B7280;line-height:1.6">
+        🐾 <strong style="color:#374151">반려동물 가중치가 높은 이유</strong><br>
+        요즘 캠핑 문화에서 반려동물과 함께하는 '펫캠핑'이 트렌드입니다. 아웃도어 브랜드와 펫케어 브랜드 간 협업·교차 섭외 기회가 많아 반려동물 업종에도 높은 가중치를 부여했습니다.
+      </div>` : '';
+
+  const indLines = industries.map(ind => {
+    const pct = Math.round((ind.pts / maxPts) * 100);
+    const color = ind.pts === maxPts ? '#E8470A' : ind.pts >= 20 ? '#F97316' : ind.pts >= 8 ? '#9CA3AF' : '#6B7280';
+    return `<div class="sp-line">
+      <span class="sp-line-label">${ind.label}</span>
+      <div class="sp-line-bar"><div class="sp-line-fill" style="width:${pct}%;background:${color}"></div></div>
+      <span class="sp-line-pts" style="color:${color}">+${ind.pts}</span>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = `<div class="scoring-panel">
+    <div class="sp-header">
+      <div class="sp-title">${ev.emoji} ${ev.name} — 섭외 우선순위 채점 기준</div>
+      <div class="sp-subtitle">아래 기준으로 ${contacts.length}명의 적합도가 자동 산정됩니다</div>
+    </div>
+    <div class="sp-hint">💡 <span><strong>연락처를 클릭</strong>하면 이메일 초안이 생성됩니다. 다시 클릭하면 이 화면으로 돌아옵니다.</span></div>
+
+    <div style="margin-top:14px"></div>
+    <div class="sp-block">
+      <div class="sp-block-title">👤 직함 <span>MAX 30pt</span></div>
+      <div class="sp-line"><span class="sp-line-label">대표 / CEO / Founder / President</span><div class="sp-line-bar"><div class="sp-line-fill" style="width:100%;background:#E8470A"></div></div><span class="sp-line-pts" style="color:#E8470A">+30</span></div>
+      <div class="sp-line"><span class="sp-line-label">이사 / Director / Manager / 팀장</span><div class="sp-line-bar"><div class="sp-line-fill" style="width:67%;background:#F97316"></div></div><span class="sp-line-pts" style="color:#F97316">+20</span></div>
+      <div class="sp-line"><span class="sp-line-label">담당 / Coordinator / Specialist</span><div class="sp-line-bar"><div class="sp-line-fill" style="width:40%;background:#9CA3AF"></div></div><span class="sp-line-pts" style="color:#9CA3AF">+12</span></div>
+      <div class="sp-line"><span class="sp-line-label">기타</span><div class="sp-line-bar"><div class="sp-line-fill" style="width:27%;background:#6B7280"></div></div><span class="sp-line-pts" style="color:#6B7280">+8</span></div>
+    </div>
+
+    <div class="sp-industry-note">📌 <strong>${ev.name} 업종 가중치</strong> — 전시마다 다르게 적용됩니다 &nbsp;<button onclick="openWeightEditor()" style="font-size:10px;padding:2px 8px;background:#1A1A1A;color:#E8470A;border:none;border-radius:4px;cursor:pointer;font-weight:700">⚙️ 편집</button></div>
+    <div class="sp-block">
+      <div class="sp-block-title">🏢 업종 <span>MAX ${maxPts}pt</span></div>
+      ${indLines}
+    </div>
+    ${gocafPetNote}
+
+    <div class="sp-block">
+      <div class="sp-block-title">📬 연락처 <span>MAX 25pt</span></div>
+      <div class="sp-line"><span class="sp-line-label">이메일 + 전화 모두 보유</span><div class="sp-line-bar"><div class="sp-line-fill" style="width:100%;background:#E8470A"></div></div><span class="sp-line-pts" style="color:#E8470A">+25</span></div>
+      <div class="sp-line"><span class="sp-line-label">이메일만 보유</span><div class="sp-line-bar"><div class="sp-line-fill" style="width:60%;background:#F97316"></div></div><span class="sp-line-pts" style="color:#F97316">+15</span></div>
+      <div class="sp-line"><span class="sp-line-label">전화번호만 보유</span><div class="sp-line-bar"><div class="sp-line-fill" style="width:60%;background:#F97316"></div></div><span class="sp-line-pts" style="color:#F97316">+15</span></div>
+    </div>
+
+    <div class="sp-grade-row">
+      <div class="sp-grade-item" style="background:#ECFDF5;border:1.5px solid #6EE7B7">
+        <div class="sg-label" style="color:#065F46">🔥 높은 적합도</div>
+        <div class="sg-range" style="color:#059669">70점 이상</div>
+      </div>
+      <div class="sp-grade-item" style="background:#FFFBEB;border:1.5px solid #FCD34D">
+        <div class="sg-label" style="color:#92400E">⚡ 보통 적합도</div>
+        <div class="sg-range" style="color:#D97706">40 – 69점</div>
+      </div>
+      <div class="sp-grade-item" style="background:#FEF2F2;border:1.5px solid #FCA5A5">
+        <div class="sg-label" style="color:#991B1B">❌ 낮은 적합도</div>
+        <div class="sg-range" style="color:#DC2626">39점 이하</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── 상세 패널 렌더 ────────────────────────────────────────────────────────
+function renderDetail() {
+  const c = state.selected;
+  if (!c) return;
+  const isOrg = c._suggestedType === "";  // 기관성 연락처 여부
+  const tc = TYPE_COLORS[c._suggestedType !== undefined ? c._suggestedType : c.type] || TYPE_COLORS["부스"];
+
+  // 언어 자동 감지
+  const lang = c.lang||"";
+  const autoLang = lang.includes("한국어")?"ko":lang.includes("일본어")?"jp":lang.includes("중국어")?"cn":"en";
+  const autoLabel = {ko:"🇰🇷 한국어",jp:"🇯🇵 日本語",cn:"🇨🇳 中文",en:"🇺🇸 English"}[autoLang];
+
+  // effective contact (언어 override)
+  let eff = c;
+  if (state.langOverride !== "auto") {
+    const m = {ko:"한국어",en:"영어",cn:"중국어",jp:"일본어"};
+    eff = {...c, lang: m[state.langOverride]};
+  }
+
+  // 이메일 생성 (기관이고 목적 없으면 생성 안 함)
+  const email = state.purpose ? generateEmail(eff, state.purpose, state.season, state.customNote) : null;
+
+  // purpose 버튼 (스폰서 제거)
+  const purposeBtns = ["부스","바이어","미디어"].map(p => {
+    const t = TYPE_COLORS[p];
+    const active = state.purpose===p;
+    return `<button class="pill-btn" onclick="setPurpose('${p}')" style="${active?`border-color:${t.border};background:${t.bg};color:${t.text};font-weight:700`:`border-color:#E5E7EB`}">${t.label}</button>`;
+  }).join("");
+
+  // 시즌 버튼 (SHOWS 구조 기반)
+  const _ev = SHOWS[state.event] || SHOWS.megazoo;
+  const seasonBtns = _ev.seasons.map(({key,label,dates})=>{
+    const active = state.season===key;
+    return `<button class="pill-btn" onclick="setSeason('${key}')" style="${active?`border-color:#E8470A;background:#FFF4EE;color:#E8470A;font-weight:700`:`border-color:#E5E7EB`}">${label}<br><span style="font-size:10px;opacity:.7">${dates.split('–')[0]}–${dates.split(' ').slice(-1)[0]}</span></button>`;
+  }).join("");
+
+  // 언어 버튼
+  const langBtns = [["auto","🔄 자동"],["ko","🇰🇷 한국어"],["en","🇺🇸 English"],["cn","🇨🇳 中文"],["jp","🇯🇵 日本語"]].map(([v,l])=>{
+    const active = state.langOverride===v;
+    return `<button class="lang-btn${active?" active":""}" onclick="setLang('${v}')">${l}</button>`;
+  }).join("");
+
+  // 이메일 영역: 기관이고 목적 미선택 → 접근방식 안내, 그 외 → 이메일 or 선택 요청
+  const emailHtml = email
+    ? `<div class="email-box">
+        <div class="email-header">
+          <span>✉️ 생성된 이메일 초안</span>
+          <button class="copy-all-btn" id="copy-all-btn" onclick="copyText(${JSON.stringify(`제목: ${email.subject}\n\n${email.body}`)}, 'copy-all-btn')">전체 복사</button>
+        </div>
+        <div class="email-body">
+          <div class="subject-row">
+            <span class="row-label">제목</span>
+            <div class="subject-box">
+              <span>${esc(email.subject)}</span>
+              <button class="copy-mini" onclick="copyText(${JSON.stringify(email.subject)}, 'copy-subj-btn')" id="copy-subj-btn">복사</button>
+            </div>
+          </div>
+          <div class="body-row">
+            <span class="row-label">본문</span>
+            <div style="flex:1">
+              <pre class="body-pre">${esc(email.body)}</pre>
+              <button class="copy-body-btn" id="copy-body-btn" onclick="copyText(${JSON.stringify(email.body)}, 'copy-body-btn')">본문만 복사</button>
+            </div>
+          </div>
+        </div>
+      </div>`
+    : isOrg
+      ? `<div class="approach-email-box">
+           <div style="font-size:18px;margin-bottom:6px">🏛</div>
+           <strong style="color:#374151;font-size:12.5px">이메일 자동 추천 없음</strong><br>
+           <span style="font-size:11px">위 접근 방식을 참고해 직접 발송 목적을 선택하면<br>이메일 초안을 생성할 수 있습니다.</span>
+         </div>`
+      : `<div class="no-purpose">위에서 <strong>발송 목적</strong>을 선택하면 이메일이 생성됩니다</div>`;
+
+  const _detailEl = document.getElementById("detail-panel");
+  if (!_detailEl) return;
+  _detailEl.innerHTML = `
+    <div class="contact-card">
+      <div class="cc-top">
+        <div>
+          <div class="cc-name">${esc(FLAGS[c.country]||"🌏")} ${esc(c.name)}</div>
+          <div class="cc-company">${esc(c.company)}</div>
+          ${c.title?`<div class="cc-title">${esc(c.title)}</div>`:""}
+          ${c.country?`<div style="font-size:10px;color:#9CA3AF;margin-top:2px">${esc(FLAGS[c.country]||"")} ${esc(c.country)}</div>`:""}
+        </div>
+        <span class="type-badge" style="background:${tc.bg};color:${tc.text};border-color:${tc.border};padding:3px 8px;font-size:11px">${tc.label}</span>
+      </div>
+      <div class="cc-meta">
+        ${c.email?`<span class="cc-email">📧 ${esc(c.email)}<button class="copy-mini" onclick="copyText('${esc(c.email)}','copy-email-btn')" id="copy-email-btn">복사</button></span>`:""}
+        ${c.phone?`<span class="cc-phone">📞 ${esc(c.phone)}</span>`:""}
+        ${c.note?`<span class="cc-note">💡 ${esc(c.note)}</span>`:""}
+      </div>
+    </div>
+
+    ${isOrg
+      ? `<div class="approach-hint"><span class="ah-icon">💡</span><div><span class="approach-hint-label">추천 접근 방식</span>${esc(c._typeReason||"")}</div></div>`
+      : (()=>{ const st=c._suggestedType||"부스"; const tr=c._typeReason||""; const tc2=TYPE_COLORS[st]||TYPE_COLORS["부스"]; return `<div style="display:flex;align-items:center;gap:7px;background:${tc2.bg};border:1.5px solid ${tc2.border};border-radius:8px;padding:9px 13px;margin-bottom:10px"><span style="background:${tc2.text};color:#fff;border-radius:5px;padding:2px 8px;font-size:10.5px;font-weight:800;white-space:nowrap">${tc2.label} 추천</span><span style="font-size:11.5px;color:#374151">${tr}</span></div>`; })()}
+    <div class="controls-row">
+      <div class="purpose-btns">
+        <div class="section-label">발송 목적</div>
+        <div class="btn-group">${purposeBtns}</div>
+      </div>
+      <div class="season-picker">
+        <div class="section-label">시즌</div>
+        <div class="btn-group">${seasonBtns}</div>
+      </div>
+    </div>
+
+    <div class="lang-row">
+      <div class="section-label">발송 언어 <span style="font-weight:400;text-transform:none;font-size:10px;color:#9CA3AF;margin-left:6px">자동 감지: ${autoLabel}</span></div>
+      <div class="btn-group">${langBtns}</div>
+    </div>
+
+    <div class="note-row">
+      <div class="section-label">추가 맞춤 메모 (선택)</div>
+      <div class="note-row-inner">
+        <input id="custom-note-input" value="${esc(state.customNote)}" placeholder="예: 지난 전시에서 만남, 특정 카테고리 관심 표명 등"
+          oninput="onNoteInput(this)"
+          onkeydown="if(event.key==='Enter'){applyNote();event.preventDefault();}"
+          class="${state.customNote ? 'has-value' : ''}">
+        <button class="btn-apply-note" id="apply-note-btn" onclick="applyNote()">메모 반영</button>
+      </div>
+    </div>
+
+    ${emailHtml}
+  `;
+}
+
+function setPurpose(p) { state.purpose = p; renderDetail(); }
+function setLang(v) { state.langOverride = v; renderDetail(); }
+function onNoteInput(el) {
+  // 타이핑 중엔 state만 임시 저장, 이메일 재생성 X
+  el.classList.toggle('has-value', el.value.length > 0);
+  // 버튼 상태 초기화 (적용됨 → 기본으로)
+  const btn = document.getElementById('apply-note-btn');
+  if (btn) { btn.textContent = '메모 반영'; btn.classList.remove('applied'); }
+}
+function applyNote() {
+  const el = document.getElementById('custom-note-input');
+  if (!el) return;
+  state.customNote = el.value;
+  const btn = document.getElementById('apply-note-btn');
+  if (btn) { btn.textContent = '✓ 적용됨'; btn.classList.add('applied'); setTimeout(()=>{ btn.textContent='메모 반영'; btn.classList.remove('applied'); }, 1800); }
+  if (state.selected && state.purpose) renderDetail();
+}
+function setNote(v) { state.customNote = v; }
+
+// ── 수동 등록 모달 ────────────────────────────────────────────────────────
+function openAddModal() {
+  document.getElementById("add-modal").style.display = "flex";
+  document.getElementById("f-name").value = "";
+  document.getElementById("f-company").value = "";
+  document.getElementById("f-title").value = "";
+  document.getElementById("f-email").value = "";
+  document.getElementById("f-phone").value = "";
+  document.getElementById("f-note").value = "";
+  document.getElementById("f-country").value = "한국";
+  document.getElementById("f-industry").value = "반려동물/펫케어";
+  document.getElementById("f-lang").value = "한국어";
+  document.getElementById("classify-result").style.display = "none";
+  document.getElementById("add-confirm-btn").className = "btn-add disabled";
+  document.getElementById("add-confirm-btn").textContent = "등록";
+  updateAnalyzeBtn();
+  // 입력 변경시 분석 버튼 상태 갱신
+  ["f-name","f-company","f-title","f-email","f-phone","f-note"].forEach(id=>{
+    document.getElementById(id).oninput = ()=>{ document.getElementById("classify-result").style.display="none"; updateAnalyzeBtn(); updateAddBtn(); };
+  });
+  ["f-country","f-industry","f-lang"].forEach(id=>{
+    document.getElementById(id).onchange = ()=>{ document.getElementById("classify-result").style.display="none"; };
+  });
+}
+function closeAddModal() { document.getElementById("add-modal").style.display = "none"; }
+
+function updateAnalyzeBtn() {
+  const ok = document.getElementById("f-name").value.trim() && document.getElementById("f-company").value.trim();
+  const btn = document.getElementById("analyze-btn");
+  btn.className = "analyze-btn " + (ok?"ready":"disabled");
+}
+function updateAddBtn() {
+  const ok = document.getElementById("f-name").value.trim() && document.getElementById("f-company").value.trim();
+  const btn = document.getElementById("add-confirm-btn");
+  if (ok) { btn.className="btn-add"; } else { btn.className="btn-add disabled"; }
+}
+
+let _classifyResult = null;
+let _classifyType = null;
+
+function runClassify() {
+  const name = document.getElementById("f-name").value.trim();
+  const company = document.getElementById("f-company").value.trim();
+  if (!name || !company) return;
+  const form = {
+    name, company,
+    title: document.getElementById("f-title").value.trim(),
+    email: document.getElementById("f-email").value.trim(),
+    phone: document.getElementById("f-phone").value.trim(),
+    industry: document.getElementById("f-industry").value,
+  };
+  const r = classifyContact(form);
+  _classifyResult = r;
+  _classifyType = r.suggestedType;
+  renderClassifyResult(r);
+  updateAddBtn();
+}
+
+function setClassifyType(t) {
+  _classifyType = t;
+  renderClassifyResult(_classifyResult);
+}
+
+function renderClassifyResult(r) {
+  const GRADE = {
+    high:{color:"#059669",bg:"#ECFDF5",border:"#6EE7B7",label:"✅ 높은 적합도",desc:"적극 섭외 대상"},
+    mid: {color:"#D97706",bg:"#FFFBEB",border:"#FCD34D",label:"⚡ 보통 적합도",desc:"상황에 따라 섭외"},
+    low: {color:"#DC2626",bg:"#FEF2F2",border:"#FCA5A5",label:"❌ 낮은 적합도",desc:"우선순위 낮음"},
+  };
+  const gs = GRADE[r.grade];
+  const tc = TYPE_COLORS[_classifyType]||TYPE_COLORS["부스"];
+  const reasons = r.reasons.map(x=>`<span class="reason-tag">${esc(x)}</span>`).join("");
+  const altBtns = ["부스","바이어","미디어"].filter(t=>t!==_classifyType).map(t=>{
+    const at = TYPE_COLORS[t];
+    return `<button class="role-alt-btn" onclick="setClassifyType('${t}')" style="border-color:${at.border};color:${at.text}">${t}로 변경</button>`;
+  }).join("");
+
+  document.getElementById("classify-result").style.display = "block";
+  document.getElementById("classify-result").innerHTML = `
+    <div class="result-box" style="border-color:${gs.border}">
+      <div class="result-grade" style="background:${gs.bg}">
+        <div>
+          <div class="result-grade-label" style="color:${gs.color}">${gs.label}</div>
+          <div class="result-grade-desc" style="color:${gs.color}">${gs.desc}</div>
+        </div>
+        <div class="result-score" style="color:${gs.color}">
+          <div class="num">${r.score}</div>
+          <div class="denom">/ 100점</div>
+        </div>
+      </div>
+      <div class="result-detail">
+        <div class="result-reasons">
+          <div class="section-label" style="margin-bottom:6px">점수 산정 이유</div>
+          ${reasons}
+        </div>
+        <div class="result-role" style="background:${tc.bg};border-color:${tc.border}">
+          <div>
+            <div class="role-label">추천 섭외 유형</div>
+            <div class="role-name" style="color:${tc.text}">${tc.label}</div>
+            <div class="role-reason" style="color:${tc.text}">${r.typeReason}</div>
+          </div>
+          <div class="role-alts">${altBtns}</div>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById("add-confirm-btn").textContent = `✓ ${_classifyType}로 등록`;
+  document.getElementById("add-confirm-btn").className = "btn-add";
+}
+
+function confirmAdd() {
+  const name = document.getElementById("f-name").value.trim();
+  const company = document.getElementById("f-company").value.trim();
+  if (!name || !company) return;
+  const nextId = Math.max(...contacts.map(c=>c.id), 0) + 1;
+  const newContact = {
+    id: nextId,
+    name,
+    company,
+    title: document.getElementById("f-title").value.trim(),
+    email: document.getElementById("f-email").value.trim(),
+    phone: document.getElementById("f-phone").value.trim(),
+    country: document.getElementById("f-country").value,
+    industry: document.getElementById("f-industry").value,
+    lang: document.getElementById("f-lang").value,
+    note: document.getElementById("f-note").value.trim(),
+    type: _classifyType || "부스",
+    _new: true,
+  };
+  contacts.push(newContact);
+  // 국가 필터 업데이트
+  const countries = ["전체",...new Set(contacts.map(c=>c.country))];
+  const sel = document.getElementById("filter-country");
+  const cur = sel.value;
+  sel.innerHTML = countries.map(c=>`<option${c===cur?' selected':''}>${esc(c)}</option>`).join("");
+  closeAddModal();
+  renderList();
+  selectContact(nextId);
+}
+
+// ── 등급 필터 ─────────────────────────────────────────────────────────────
+var rkFilter = 'all'; // 하위 호환성
+var gradeFilter = 'all';
+function setGradeFilter(f) { gradeFilter=f; renderList(); }
+
+// ── 시작 ─────────────────────────────────────────────────────────────────
+init();
+
+// ── 채점 기준 모달 ──────────────────────────────────────────────────────────
+function openScoringModal()  { document.getElementById('scoring-modal').style.display='flex'; }
+function closeScoringModal() { document.getElementById('scoring-modal').style.display='none'; }
+
+// ── 가중치 편집 모달 ──────────────────────────────────────────────────────────
+const WE_INDUSTRIES = [
+  { key:'pet',     label:'반려동물 / 펫케어' },
+  { key:'health',  label:'의료 / 헬스케어' },
+  { key:'it',      label:'IT / 기술' },
+  { key:'trade',   label:'유통 / 무역' },
+  { key:'beauty',  label:'뷰티 / 코스메틱' },
+  { key:'food',    label:'식품 / 농업' },
+  { key:'edu',     label:'교육 / 연구' },
+  { key:'mfg',     label:'제조 / 건설' },
+  { key:'media',   label:'미디어 / 언론' },
+  { key:'camping', label:'캠핑 / 아웃도어' },
+  { key:'other',   label:'기타' },
+];
+
+function openWeightEditor() {
+  const ev = SHOWS[state.event] || SHOWS.megazoo;
+  const w  = SHOW_WEIGHTS[state.event] || SHOW_WEIGHTS.megazoo;
+  document.getElementById('we-title').textContent = `${ev.emoji} ${ev.name} — 가중치 편집`;
+
+  const makeRow = (label, key, val, type, max) =>
+    `<div class="we-field">
+      <span class="we-label">${label}</span>
+      <div class="we-input-wrap">
+        <input type="range" min="0" max="${max}" value="${val}" class="we-range"
+          oninput="this.nextElementSibling.textContent=this.value"
+          data-key="${key}" data-type="${type}">
+        <span class="we-val">${val}</span>
+      </div>
+    </div>`;
+
+  const industryRows = WE_INDUSTRIES.map(({key, label}) =>
+    makeRow(label, key, w[key]??0, 'industry', 50)).join('');
+
+  const titleRows = [
+    { key:'ceo',        label:'대표 / CEO / Founder' },
+    { key:'director',   label:'이사 / Manager / 팀장' },
+    { key:'specialist', label:'담당 / Specialist' },
+    { key:'other',      label:'기타' },
+  ].map(({key, label}) => makeRow(label, key, TITLE_WEIGHTS[key]??0, 'title', 50)).join('');
+
+  const contactRows = [
+    { key:'both',      label:'이메일 + 전화 모두' },
+    { key:'emailOnly', label:'이메일만 보유' },
+    { key:'phoneOnly', label:'전화번호만 보유' },
+  ].map(({key, label}) => makeRow(label, key, CONTACT_WEIGHTS[key]??0, 'contact', 30)).join('');
+
+  document.getElementById('we-fields').innerHTML =
+    `<div class="we-section-label">🏢 업종 가중치 (${ev.name} 전용)</div>${industryRows}
+     <div class="we-section-label" style="margin-top:10px">👤 직함 가중치 (전시 공통)</div>${titleRows}
+     <div class="we-section-label" style="margin-top:10px">📬 연락처 가중치 (전시 공통)</div>${contactRows}`;
+
+  document.getElementById('weight-editor-modal').style.display = 'flex';
+}
+
+function closeWeightEditor() {
+  document.getElementById('weight-editor-modal').style.display = 'none';
+}
+
+function saveWeights() {
+  const inputs = document.querySelectorAll('#we-fields .we-range');
+  const w = SHOW_WEIGHTS[state.event] || SHOW_WEIGHTS.megazoo;
+  inputs.forEach(inp => {
+    const val = parseInt(inp.value);
+    const type = inp.dataset.type;
+    if (type === 'industry') w[inp.dataset.key] = val;
+    else if (type === 'title') TITLE_WEIGHTS[inp.dataset.key] = val;
+    else if (type === 'contact') CONTACT_WEIGHTS[inp.dataset.key] = val;
+  });
+  // 점수 캐시 초기화 후 전체 재산정
+  contacts.forEach(c => { c._score = undefined; c._grade = undefined; c._suggestedType = undefined; c._typeReason = undefined; c._breakdown = undefined; });
+  closeWeightEditor();
+  renderGradeFilterChips();
+  renderList();
+  if (!state.selected) renderEmptyState();
+}
+
+function resetWeights() {
+  const def = DEFAULT_WEIGHTS[state.event];
+  if (!def) return;
+  Object.assign(SHOW_WEIGHTS[state.event], def);
+  Object.assign(TITLE_WEIGHTS, DEFAULT_TITLE_WEIGHTS);
+  Object.assign(CONTACT_WEIGHTS, DEFAULT_CONTACT_WEIGHTS);
+  // 슬라이더 값 초기화
+  const inputs = document.querySelectorAll('#we-fields .we-range');
+  inputs.forEach(inp => {
+    const type = inp.dataset.type;
+    let val = 0;
+    if (type === 'industry') val = def[inp.dataset.key] ?? 0;
+    else if (type === 'title') val = DEFAULT_TITLE_WEIGHTS[inp.dataset.key] ?? 0;
+    else if (type === 'contact') val = DEFAULT_CONTACT_WEIGHTS[inp.dataset.key] ?? 0;
+    inp.value = val;
+    inp.nextElementSibling.textContent = val;
+  });
+}
+
+function renderRankingCards() {
+  const scored = window._rkScored || [];
+  const list = rkFilter==='all' ? scored : scored.filter(c=>c._grade===rkFilter);
+
+  function scoreColor(s) { return s>=70?'#059669':s>=40?'#F59E0B':'#EF4444'; }
+
+  if (rkFilter==='all') {
+    const high = scored.filter(c=>c._grade==='high');
+    const mid  = scored.filter(c=>c._grade==='mid');
+    const low  = scored.filter(c=>c._grade==='low');
+    document.getElementById('rk-cards').innerHTML =
+      renderSection('✅ 높은 적합도','#059669',high) +
+      renderSection('⚡ 보통 적합도','#D97706',mid) +
+      renderSection('❌ 낮은 적합도','#DC2626',low);
+  } else {
+    const labels = {high:'✅ 높은 적합도',mid:'⚡ 보통 적합도',low:'❌ 낮은 적합도'};
+    const colors = {high:'#059669',mid:'#D97706',low:'#DC2626'};
+    document.getElementById('rk-cards').innerHTML = renderSection(labels[rkFilter],colors[rkFilter],list);
+  }
+}
+
+function renderSection(label, color, list) {
+  if (!list.length) return '';
+  function scoreColor(s) { return s>=70?'#059669':s>=40?'#F59E0B':'#EF4444'; }
+  const cards = list.map((c,i)=>{
+    const tc = TYPE_COLORS[c._sugType]||TYPE_COLORS['부스'];
+    const rc = i===0?'gold':i===1?'silver':i===2?'bronze':'';
+    const tags = c._reasons.map(r=>`<span class="rk-tag">${esc(r)}</span>`).join('');
+    const sc = scoreColor(c._score);
+    return `<div class="rk-card" onclick="goToContact(${c.id})">
+      <div class="rk-rank ${rc}">${i+1}</div>
+      <div>
+        <div class="rk-name">${esc(FLAGS[c.country]||'🌏')} ${esc(c.name)}</div>
+        <div class="rk-company">${esc(c.company)}</div>
+      </div>
+      <div class="rk-score-col">
+        <span class="rk-score-num" style="color:${sc}">${c._score}<span style="font-size:10px;font-weight:500;color:#9CA3AF">pt</span></span>
+        <div class="rk-score-bar-bg"><div class="rk-score-bar-fill" style="width:${c._score}%;background:${sc}"></div></div>
+      </div>
+      <div><span class="rk-type-badge" style="background:${tc.bg};color:${tc.text};border-color:${tc.border}">${tc.label}</span></div>
+      <div class="rk-tags">${tags}</div>
+    </div>`;
+  }).join('');
+  return `<div class="rk-section-label" style="color:${color}">${label}<span style="font-size:10px;font-weight:400;color:#9CA3AF;margin-left:6px">${list.length}명</span></div>${cards}`;
+}
+
+function goToContact(id) {
+  selectContact(id);
+}
+
+// ── 행사 상세바 렌더 (Tier 3) ──────────────────────────────────────
+function renderEventDetailBar() {
+  const bar = document.getElementById('event-detail-bar');
+  if (!bar) return;
+  const ev = SHOWS[state.event] || SHOWS.megazoo;
+  const ST = ev.stats || {};
+
+  const seasonPills = ev.seasons.map(s => {
+    const active = s.key === state.season;
+    return `<button class="ev-season-pill${active?' active':''}" onclick="setSeason('${s.key}')">${s.label}<br><span class="ev-season-date">${s.dates}</span></button>`;
+  }).join('');
+
+  const statItems = [
+    ['총 방문객', (ST.visitors2025||'—')+'명'],
+    ['참가사',   (ST.exhibitors2025||'—')+'개사'],
+    ['해외 참가국',(ST.countries2025||'—')+'개국'],
+    ['비즈매칭', (ST.matchMeetings||'—')+'건'],
+    ['총 상담액', ST.consultationUSD||'—'],
+  ].map(([l,v])=>`<div class="ev-stat-item"><span class="ev-stat-label">${l}</span><span class="ev-stat-value">${v}</span></div>`).join('');
+
+  bar.innerHTML = `
+    ${seasonPills}
+    <div class="ev-divider"></div>
+    <span class="ev-perf-label">2025 실적</span>
+    ${statItems}
+  `;
+}
+
+</script>
+</body>
+</html>
