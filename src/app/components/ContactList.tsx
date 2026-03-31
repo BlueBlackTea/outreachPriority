@@ -185,34 +185,28 @@ export function ContactList({
   return (
     <div className="w-full md:w-[380px] border-r border-gray-200 bg-white flex flex-col flex-shrink-0 shadow-sm">
       {/* 필터 토글 헤더 */}
-      <button
-        onClick={() => setFilterOpen(o => !o)}
-        className="px-4 py-3 border-b border-gray-200 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors flex-shrink-0"
-      >
-        <span className="text-sm font-bold text-gray-700">필터</span>
-        <div className="flex items-center gap-2">
+      <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between bg-gray-50 flex-shrink-0">
+        <button
+          onClick={() => setFilterOpen(o => !o)}
+          className="flex items-center gap-2 hover:opacity-70 transition-opacity"
+        >
+          <span className="text-sm font-bold text-gray-700">필터</span>
           {!filterOpen && (gradeFilter !== 'all' || filterType !== '전체' || filterCountry !== '전체') && (
             <span className="text-xs text-[#E8470A] font-semibold">필터 적용 중</span>
           )}
           <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${filterOpen ? 'rotate-180' : ''}`} />
-        </div>
-      </button>
+        </button>
+        <button
+          onClick={() => setShowExcelModal(true)}
+          className="text-xs text-gray-400 underline hover:text-[#E8470A] transition-colors"
+        >
+          엑셀업로드
+        </button>
+      </div>
 
       {/* 필터 영역 */}
       {filterOpen && (
         <>
-      {/* 버튼 행 */}
-      <div className="p-3 border-b border-gray-100 flex gap-2">
-        <Button
-          variant="outline"
-          className="flex-1 border-[#E8470A] text-[#E8470A] hover:bg-[#FFF4EE] text-sm font-bold shadow-sm"
-          onClick={() => setShowExcelModal(true)}
-        >
-          <FileSpreadsheet className="w-4 h-4 mr-1.5" />
-          엑셀 업로드
-        </Button>
-      </div>
-
       {/* 검색 및 필터 */}
       <div className="p-3 border-b border-gray-100 bg-gray-100">
         <div className="relative">
@@ -507,7 +501,7 @@ export function ContactList({
                         if (el) cardRefs.current.set(contact.id, el);
                         else cardRefs.current.delete(contact.id);
                       }}
-                      onClick={() => onSelectContact(contact.id)}
+                      onClick={() => { onSelectContact(contact.id); setFilterOpen(false); }}
                       className={`px-4 py-3 border-b border-gray-50 cursor-pointer border-l-[3px] transition-all hover:shadow-sm ${
                         selectedId === contact.id
                           ? 'bg-[#FFF4EE] border-l-[#E8470A] shadow-sm'

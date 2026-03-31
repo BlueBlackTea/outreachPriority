@@ -690,10 +690,10 @@ export function ContactDetail({ contact, selectedEvent, contacts }: Props) {
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto bg-white border-t divide-y divide-gray-100">
+            <div className="flex-1 flex flex-col overflow-hidden bg-white border-t divide-y divide-gray-100">
 
               {/* ── 섹션 1: 채점 근거 ── */}
-              <div>
+              <div className="flex-shrink-0">
                 <button
                   onClick={() => setOpenSection(o => o === 'breakdown' ? null : 'breakdown')}
                   className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-gray-50 transition-colors"
@@ -731,7 +731,7 @@ export function ContactDetail({ contact, selectedEvent, contacts }: Props) {
               </div>
 
               {/* ── 섹션 2: 추천 영업 목적 ── */}
-              <div>
+              <div className="flex-shrink-0">
                 <button
                   onClick={() => setOpenSection(o => o === 'purpose' ? null : 'purpose')}
                   className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-gray-50 transition-colors"
@@ -778,10 +778,10 @@ export function ContactDetail({ contact, selectedEvent, contacts }: Props) {
               </div>
 
               {/* ── 섹션 3: 분야별 적합도 비교 ── */}
-              <div>
+              <div className={openSection === 'compare' ? 'flex-1 flex flex-col overflow-hidden min-h-0' : 'flex-shrink-0'}>
                 <button
                   onClick={() => setOpenSection(o => o === 'compare' ? null : 'compare')}
-                  className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                  className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-gray-50 transition-colors flex-shrink-0"
                 >
                   <div className="flex items-center gap-2">
                     <div className="w-1 h-4 rounded-full bg-[#E8470A] flex-shrink-0" />
@@ -790,7 +790,7 @@ export function ContactDetail({ contact, selectedEvent, contacts }: Props) {
                   <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ${openSection === 'compare' ? 'rotate-180' : ''}`} />
                 </button>
                 {openSection === 'compare' && (
-                  <div className="px-4 pb-4 space-y-2.5">
+                  <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-2.5">
                     {showScores.map(item => {
                       const isCurrent = item.key === catKey;
                       const barColor = item.score >= 70 ? 'bg-emerald-500' : item.score >= 40 ? 'bg-amber-400' : 'bg-red-400';
