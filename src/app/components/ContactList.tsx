@@ -45,6 +45,7 @@ export function ContactList({
   const [sortKey, setSortKey] = useState<SortKey>('priority');
   const [sortDir, setSortDir] = useState<1 | -1>(1);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [filterOpen, setFilterOpen] = useState(true);
   const [showExcelModal, setShowExcelModal] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -110,6 +111,7 @@ export function ContactList({
       setSortKey(key);
       setSortDir(1);
     }
+    setFilterOpen(false);
   };
 
   const handleDownloadTemplate = () => {
@@ -182,6 +184,23 @@ export function ContactList({
 
   return (
     <div className="w-full md:w-[380px] border-r border-gray-200 bg-white flex flex-col flex-shrink-0 shadow-sm">
+      {/* 필터 토글 헤더 */}
+      <button
+        onClick={() => setFilterOpen(o => !o)}
+        className="px-4 py-3 border-b border-gray-200 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors flex-shrink-0"
+      >
+        <span className="text-sm font-bold text-gray-700">필터</span>
+        <div className="flex items-center gap-2">
+          {!filterOpen && (gradeFilter !== 'all' || filterType !== '전체' || filterCountry !== '전체') && (
+            <span className="text-xs text-[#E8470A] font-semibold">필터 적용 중</span>
+          )}
+          <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${filterOpen ? 'rotate-180' : ''}`} />
+        </div>
+      </button>
+
+      {/* 필터 영역 */}
+      {filterOpen && (
+        <>
       {/* 버튼 행 */}
       <div className="p-3 border-b border-gray-100 flex gap-2">
         <Button
@@ -213,7 +232,7 @@ export function ContactList({
           <CollapsibleContent>
             {/* 유형 및 국가 필터 */}
             <div className="mt-3 flex gap-2">
-              <Select value={filterType} onValueChange={setFilterType}>
+              <Select value={filterType} onValueChange={(v) => { setFilterType(v); setFilterOpen(false); }}>
                 <SelectTrigger className="flex-1 text-sm h-9 border-gray-300 bg-white">
                   <SelectValue />
                 </SelectTrigger>
@@ -224,7 +243,7 @@ export function ContactList({
                   <SelectItem value="미디어">미디어</SelectItem>
                 </SelectContent>
               </Select>
-              <Select value={filterCountry} onValueChange={setFilterCountry}>
+              <Select value={filterCountry} onValueChange={(v) => { setFilterCountry(v); setFilterOpen(false); }}>
                 <SelectTrigger className="flex-1 text-sm h-9 border-gray-300 bg-white">
                   <SelectValue placeholder="전체 국가" />
                 </SelectTrigger>
@@ -282,7 +301,7 @@ export function ContactList({
         <div className="hidden lg:block">
           {/* 유형 및 국가 필터 */}
           <div className="mt-3 flex gap-2">
-            <Select value={filterType} onValueChange={setFilterType}>
+            <Select value={filterType} onValueChange={(v) => { setFilterType(v); setFilterOpen(false); }}>
               <SelectTrigger className="flex-1 text-sm h-9 border-gray-300 bg-white">
                 <SelectValue />
               </SelectTrigger>
@@ -293,7 +312,7 @@ export function ContactList({
                 <SelectItem value="미디어">미디어</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={filterCountry} onValueChange={setFilterCountry}>
+            <Select value={filterCountry} onValueChange={(v) => { setFilterCountry(v); setFilterOpen(false); }}>
               <SelectTrigger className="flex-1 text-sm h-9 border-gray-300 bg-white">
                 <SelectValue placeholder="전체 국가" />
               </SelectTrigger>
@@ -349,8 +368,8 @@ export function ContactList({
         </div>
         <div className="flex flex-col gap-2">
           <button
-            onClick={() => setGradeFilter('all')}
-            className={`text-sm px-3 py-2 rounded-lg border-[1.5px] font-semibold transition-all flex items-center justify-center gap-2 shadow-sm ${ 
+            onClick={() => { setGradeFilter('all'); setFilterOpen(false); }}
+            className={`text-sm px-3 py-2 rounded-lg border-[1.5px] font-semibold transition-all flex items-center justify-center gap-2 shadow-sm ${
               gradeFilter === 'all'
                 ? 'text-white'
                 : 'bg-white text-gray-600 border-gray-300 hover:border-gray-400'
@@ -365,8 +384,8 @@ export function ContactList({
           </button>
           <div className="flex gap-2">
             <button
-              onClick={() => setGradeFilter('high')}
-              className={`flex-1 text-sm px-3 py-2 rounded-lg border-[1.5px] font-semibold transition-all flex items-center justify-center gap-1 shadow-sm ${ 
+              onClick={() => { setGradeFilter('high'); setFilterOpen(false); }}
+              className={`flex-1 text-sm px-3 py-2 rounded-lg border-[1.5px] font-semibold transition-all flex items-center justify-center gap-1 shadow-sm ${
                 gradeFilter === 'high'
                   ? 'bg-emerald-600 text-white border-emerald-600'
                   : 'bg-white text-gray-600 border-gray-300 hover:border-emerald-600'
@@ -376,8 +395,8 @@ export function ContactList({
               <span className="text-xs opacity-75 font-bold">({gradeCounts.high})</span>
             </button>
             <button
-              onClick={() => setGradeFilter('mid')}
-              className={`flex-1 text-sm px-3 py-2 rounded-lg border-[1.5px] font-semibold transition-all flex items-center justify-center gap-1 shadow-sm ${ 
+              onClick={() => { setGradeFilter('mid'); setFilterOpen(false); }}
+              className={`flex-1 text-sm px-3 py-2 rounded-lg border-[1.5px] font-semibold transition-all flex items-center justify-center gap-1 shadow-sm ${
                 gradeFilter === 'mid'
                   ? 'bg-amber-600 text-white border-amber-600'
                   : 'bg-white text-gray-600 border-gray-300 hover:border-amber-600'
@@ -387,8 +406,8 @@ export function ContactList({
               <span className="text-xs opacity-75 font-bold">({gradeCounts.mid})</span>
             </button>
             <button
-              onClick={() => setGradeFilter('low')}
-              className={`flex-1 text-sm px-3 py-2 rounded-lg border-[1.5px] font-semibold transition-all flex items-center justify-center gap-1 shadow-sm ${ 
+              onClick={() => { setGradeFilter('low'); setFilterOpen(false); }}
+              className={`flex-1 text-sm px-3 py-2 rounded-lg border-[1.5px] font-semibold transition-all flex items-center justify-center gap-1 shadow-sm ${
                 gradeFilter === 'low'
                   ? 'bg-red-600 text-white border-red-600'
                   : 'bg-white text-gray-600 border-gray-300 hover:border-red-600'
@@ -400,6 +419,8 @@ export function ContactList({
           </div>
         </div>
       </div>
+        </>
+      )}
 
       {/* 엑셀 업로드 모달 */}
       {showExcelModal && (
