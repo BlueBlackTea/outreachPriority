@@ -406,24 +406,16 @@ export function ContactDetail({ contact, selectedEvent, contacts }: Props) {
 
   const [showMoreInd, setShowMoreInd] = useState(false);
 
-  // 전시별 점수 비교 — early return 전에 위치해야 훅 규칙 준수
+  // 분야별 점수 비교 — early return 전에 위치해야 훅 규칙 준수
   const showScores = useMemo(() => {
     if (!contact) return [];
-    const all = Object.entries(SHOWS).map(([key, show]) => ({
-      key,
-      name: show.name.replace(/\s*\d{4}$/, ''),
-      emoji: show.emoji,
-      score: classifyContact(contact, key).score,
-    }));
-    all.sort((a, b) => b.score - a.score);
-    const top10 = all.slice(0, 10);
-    const effectiveKey = selectedEvent.startsWith('cat_') ? '' : selectedEvent;
-    if (effectiveKey && !top10.find(x => x.key === effectiveKey)) {
-      const cur = all.find(x => x.key === effectiveKey);
-      if (cur) { top10.pop(); top10.push(cur); }
-    }
-    return top10;
-  }, [contact, selectedEvent]);
+    return SHOW_GROUPS.map(group => ({
+      key: group.key,
+      name: group.label,
+      emoji: group.emoji,
+      score: classifyContact(contact, group.key).score,
+    })).sort((a, b) => b.score - a.score);
+  }, [contact]);
 
   // ── 빈 상태 ──────────────────────────────────────────────────────────────
   if (!contact || !classifyResult) {
@@ -435,7 +427,7 @@ export function ContactDetail({ contact, selectedEvent, contacts }: Props) {
           <div className="py-10 px-5 text-center">
             <MousePointerClick className="w-8 h-8 text-orange-300 mx-auto mb-4" />
             <div className="text-base font-semibold text-gray-700 mb-2">좌측 목록에서 연락처를 선택하세요</div>
-            <div className="text-sm text-gray-400 mb-6">선택하면 전시별 적합도 분석을 확인합니다</div>
+            <div className="text-sm text-gray-400 mb-6">선택하면 분야별 적합도 분석을 확인합니다</div>
             <span className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1.5 text-xs text-amber-700 rounded-full font-medium">
               TIP &nbsp;↑↓ 화살표 키로 빠르게 탐색할 수 있습니다
             </span>
@@ -758,13 +750,13 @@ export function ContactDetail({ contact, selectedEvent, contacts }: Props) {
                 <div className="px-4 pt-4 pb-2 border-t border-gray-100 flex-shrink-0">
                   <div className="flex items-center gap-2">
                     <div className="w-1 h-4 rounded-full bg-[#E8470A]" />
-                    <span className="text-sm font-bold text-gray-700">전시별 적합도 비교</span>
+                    <span className="text-sm font-bold text-gray-700">분야별 적합도 비교</span>
                   </div>
                 </div>
                 <div className="flex-1 overflow-y-auto px-4 pb-4">
                 <div className="space-y-2.5">
                   {showScores.map(item => {
-                    const isCurrent = item.key === selectedEvent;
+                    const isCurrent = item.key === catKey;
                     const barColor = item.score >= 70 ? 'bg-emerald-500' : item.score >= 40 ? 'bg-amber-400' : 'bg-red-400';
                     return (
                       <div key={item.key} className={`rounded-lg px-3 py-2 ${isCurrent ? 'bg-orange-50 ring-1 ring-[#E8470A]/30' : 'bg-gray-50'}`}>
