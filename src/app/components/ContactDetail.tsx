@@ -674,7 +674,7 @@ export function ContactDetail({ contact, selectedEvent, contacts }: Props) {
 
         {/* RIGHT: 적합도 분석 */}
         <div className="flex-1 min-w-0 flex flex-col gap-4">
-          <div className={`flex-1 flex flex-col border-[1.5px] rounded-xl overflow-hidden shadow-sm ${gradeBg}`}>
+          <div className={`flex-1 min-h-0 flex flex-col border-[1.5px] rounded-xl overflow-hidden shadow-sm ${gradeBg}`}>
             <div className="p-4 flex justify-between items-center">
               <div>
                 <div className={`font-bold text-xl ${gradeText}`}>
@@ -690,7 +690,7 @@ export function ContactDetail({ contact, selectedEvent, contacts }: Props) {
               </div>
             </div>
 
-            <div className="flex-1 flex flex-col overflow-hidden bg-white border-t divide-y divide-gray-100">
+            <div className="flex-1 min-h-0 flex flex-col overflow-hidden bg-white border-t divide-y divide-gray-100">
 
               {/* ── 섹션 1: 채점 근거 ── */}
               <div className="flex-shrink-0">
