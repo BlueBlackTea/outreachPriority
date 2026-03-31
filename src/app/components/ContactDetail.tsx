@@ -597,7 +597,7 @@ export function ContactDetail({ contact, selectedEvent, contacts }: Props) {
         {/* LEFT: 연락처 정보 */}
         <div className="w-full md:w-[38%] bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col overflow-hidden">
           {/* 이미지 / 아바타 영역 */}
-          <div className="flex-1 min-h-[180px] flex items-center justify-center bg-gray-50 border-b border-gray-100">
+          <div className="flex-1 min-h-[180px] flex items-center justify-center bg-white border-b border-gray-100">
             {contact.image_url ? (
               <img
                 src={contact.image_url}
