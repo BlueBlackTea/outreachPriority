@@ -591,7 +591,7 @@ export function ContactDetail({ contact, selectedEvent, contacts }: Props) {
   const initials = contact.name.slice(0,2).toUpperCase();
 
   return (
-    <div className="flex-1 overflow-hidden bg-gray-50">
+    <div className="flex-1 overflow-hidden bg-gray-100">
       <div className="flex flex-col md:flex-row gap-4 p-4 md:p-5 h-full items-stretch">
 
         {/* LEFT: 연락처 정보 */}
