@@ -11,6 +11,7 @@
 ## deploy
 - 빌드 및 GitHub Pages 배포
 - npm run build → gh-pages 브랜치 푸시
+- **커밋 전 `guide/handover.md` 업데이트 필수**
 - **배포 전 `guide/deploy.md` 필독**
 
 ## general-purpose

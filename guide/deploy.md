@@ -11,10 +11,11 @@ C:\Users\PC-ENS-N0289\Documents\Google Drive\ObsidianVault\03 Ideas\esangCampus2
 ## 배포 흐름
 
 ```
-1. git status          ← 수정된 파일 확인 (필수!)
-2. git add <파일들>
-3. git commit -m "..."
-4. git push origin main
+1. git status                  ← 수정된 파일 확인 (필수!)
+2. guide/handover.md 업데이트  ← 이번 작업 내용 기록 (필수!)
+3. git add <파일들> guide/handover.md
+4. git commit -m "..."
+5. git push origin main
    → GitHub Actions 자동 빌드 → gh-pages 배포
 ```
 
