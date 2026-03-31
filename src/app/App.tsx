@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Toaster } from './components/ui/sonner';
 import { ContactList } from './components/ContactList';
 import { ContactDetail } from './components/ContactDetail';
@@ -11,7 +11,7 @@ import { classifyContact } from './lib/scoring';
 import { Contact } from './lib/types';
 import { supabase } from './lib/supabase';
 import { parseExcelFile } from './lib/excelUtils';
-import { LogOut, Database, FileSpreadsheet } from 'lucide-react';
+import { LogOut, Database, FileSpreadsheet, ChevronDown, ChevronRight } from 'lucide-react';
 
 type DataSource = 'none' | 'excel' | 'supabase';
 
@@ -19,13 +19,15 @@ export default function App() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [dataSource, setDataSource] = useState<DataSource>('none');
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [selectedEvent, setSelectedEvent] = useState('megazoo');
-  const [selectedSeason, setSelectedSeason] = useState('1');
+  const [selectedEvent, setSelectedEvent] = useState('cat_pet');
   const [showWeightModal, setShowWeightModal] = useState(false);
   const [showScoringModal, setShowScoringModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [visibleContactIds, setVisibleContactIds] = useState<number[]>([]);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [hoveredGroup, setHoveredGroup] = useState<string | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const top3Categories = useMemo(() => {
     return SHOW_GROUPS
@@ -37,10 +39,30 @@ export default function App() {
       .slice(0, 3);
   }, [contacts]);
 
+  const displayChips = useMemo(() => {
+    const selected = SHOW_GROUPS.find(g => g.key === selectedEvent);
+    if (!selected) return top3Categories;
+    const cnt = contacts.filter(c => classifyContact(c, selected.key).grade === 'high').length;
+    const selectedWithCnt = { ...selected, cnt };
+    const rest = top3Categories.filter(g => g.key !== selectedEvent).slice(0, 2);
+    return [selectedWithCnt, ...rest];
+  }, [selectedEvent, top3Categories, contacts]);
+
   // selectedEvent가 바뀔 때 선택된 연락처 초기화
   useEffect(() => {
     setSelectedId(null);
   }, [selectedEvent]);
+
+  // 드롭다운 외부 클릭 시 닫기
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   // 세션 복원
   useEffect(() => {
@@ -151,43 +173,79 @@ export default function App() {
             )}
           </div>
 
-          {/* 전시회 탭 */}
+          {/* 분야 칩 + 드롭다운 */}
           <div className="flex items-center gap-2 flex-shrink-0">
-            {top3Categories.map(g => (
+            {displayChips.map(g => (
               <button
                 key={g.key}
-                onClick={() => { setSelectedEvent(g.key); setSelectedSeason('1'); }}
-                className={`px-3 py-1.5 rounded-full border-[1.5px] font-bold text-xs whitespace-nowrap transition-all flex items-center gap-1 ${
+                onClick={() => setSelectedEvent(g.key)}
+                className={`px-3 py-1.5 rounded-full font-bold text-xs whitespace-nowrap transition-all flex items-center gap-1 ${
                   selectedEvent === g.key
-                    ? 'bg-[#E8470A] text-white border-[#E8470A]'
-                    : 'bg-transparent text-gray-400 border-[#444] hover:border-[#E8470A] hover:text-[#E8470A]'
+                    ? 'bg-[#E8470A] text-white shadow-[0_0_16px_rgba(232,71,10,0.55)] scale-105 border-[1.5px] border-[#ff6a35]'
+                    : 'bg-transparent text-gray-400 border-[1.5px] border-[#444] hover:border-[#E8470A] hover:text-[#E8470A]'
                 }`}
               >
                 {g.emoji} {g.label}
-                <span className="opacity-55 font-normal text-[10px] ml-0.5">{g.cnt}명</span>
+                <span className={`font-normal text-[10px] ml-0.5 ${selectedEvent === g.key ? 'opacity-80' : 'opacity-55'}`}>{g.cnt}명</span>
               </button>
             ))}
 
-            <select
-              value={!selectedEvent.startsWith('cat_') ? selectedEvent : ''}
-              onChange={e => { if (e.target.value) { setSelectedEvent(e.target.value); setSelectedSeason('1'); } }}
-              className={`bg-[#1a1a1a] border-[1.5px] rounded-full px-3 py-1.5 text-xs font-bold cursor-pointer appearance-none outline-none ${
-                !selectedEvent.startsWith('cat_')
-                  ? 'border-[#E8470A] text-[#E8470A]'
-                  : 'border-[#444] text-gray-400 hover:border-[#E8470A] hover:text-[#E8470A]'
-              }`}
-            >
-              <option value="" disabled>특정 전시 선택…</option>
-              {SHOW_GROUPS.map(g => (
-                <optgroup key={g.key} label={`${g.emoji} ${g.label}`}>
-                  {g.shows.filter(k => SHOWS[k]).map(k => (
-                    <option key={k} value={k}>
-                      {SHOWS[k].emoji} {SHOWS[k].name.replace(/\s*\d{4}$/, '')}
-                    </option>
+            {/* 구분선 */}
+            <div className="w-px h-4 bg-[#333] mx-1 flex-shrink-0" />
+
+            {/* 분야 드롭다운 — 시각적으로 칩과 구분되는 박스형 */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setDropdownOpen(o => !o)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#252525] border border-[#3a3a3a] text-gray-400 text-xs whitespace-nowrap transition-all hover:border-[#555] hover:text-gray-200 font-medium"
+              >
+                <span className="text-gray-500 text-[10px] font-normal mr-0.5">분야</span>
+                <ChevronDown className={`w-3 h-3 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {dropdownOpen && (
+                <div className="absolute top-full right-0 mt-1 bg-[#1a1a1a] border border-[#333] rounded-lg shadow-2xl z-50 min-w-[170px] py-1">
+                  {SHOW_GROUPS.map(g => (
+                    <div
+                      key={g.key}
+                      className={`relative flex items-center justify-between px-3 py-2 text-xs cursor-pointer transition-colors ${
+                        selectedEvent === g.key
+                          ? 'bg-[#E8470A]/15 text-[#ff6a35]'
+                          : 'text-gray-300 hover:bg-[#2a2a2a] hover:text-white'
+                      }`}
+                      onMouseEnter={() => setHoveredGroup(g.key)}
+                      onMouseLeave={() => setHoveredGroup(null)}
+                      onClick={() => { setSelectedEvent(g.key); setDropdownOpen(false); }}
+                    >
+                      <span className="flex items-center gap-1.5">
+                        {g.emoji} {g.label}
+                      </span>
+                      {g.shows.filter(k => SHOWS[k]).length > 0 && (
+                        <ChevronRight className="w-3 h-3 text-gray-500 flex-shrink-0 ml-2" />
+                      )}
+
+                      {/* 서브메뉴: 전시 목록 (읽기 전용 표시) */}
+                      {hoveredGroup === g.key && g.shows.filter(k => SHOWS[k]).length > 0 && (
+                        <div
+                          className="absolute right-full top-0 mr-1 bg-[#1e1e1e] border border-[#333] rounded-lg shadow-2xl min-w-[180px] py-1"
+                          onMouseEnter={() => setHoveredGroup(g.key)}
+                        >
+                          <div className="px-3 py-1.5 text-[10px] text-gray-500 border-b border-[#2a2a2a] mb-1 font-medium tracking-wide">소속 전시</div>
+                          {g.shows.filter(k => SHOWS[k]).map(k => (
+                            <div
+                              key={k}
+                              className="px-3 py-1.5 text-xs text-gray-400 whitespace-nowrap cursor-default select-none"
+                            >
+                              {SHOWS[k as keyof typeof SHOWS].emoji} {SHOWS[k as keyof typeof SHOWS].name.replace(/\s*\d{4}$/, '')}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   ))}
-                </optgroup>
-              ))}
-            </select>
+                </div>
+              )}
+            </div>
 
             {/* 로그아웃 (supabase 모드에서만) */}
             {dataSource === 'supabase' && (
@@ -231,8 +289,7 @@ export default function App() {
         <ContactDetail
           contact={selectedContact}
           selectedEvent={selectedEvent}
-          selectedSeason={selectedSeason}
-          onSeasonChange={setSelectedSeason}
+          contacts={contacts}
         />
       </div>
 

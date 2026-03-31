@@ -11,6 +11,7 @@
 ## deploy
 - 빌드 및 GitHub Pages 배포
 - npm run build → gh-pages 브랜치 푸시
+- **배포 전 `guide/deploy.md` 필독**
 
 ## general-purpose
 - 파일 시스템 작업, GitHub CLI, 복합 작업

@@ -14,6 +14,7 @@ export interface Contact {
   score: number;
   note: string;
   priority?: number;
+  image_url?: string;
 }
 
 export interface Show {
@@ -77,6 +78,10 @@ export interface ClassifyResult {
   typeReason: string;
 }
 
+export interface EmailContent {
+  subject: string;
+  body: string;
+}
 
 export interface IndustryWeights {
   pet: number;

@@ -65,6 +65,7 @@ export function LandingScreen({ onContactsLoaded }: LandingScreenProps) {
       type: row.type ?? '부스',
       score: row.score ?? 0,
       note: row.note ?? '',
+      image_url: row.image_url ?? undefined,
     }));
 
     setLoginLoading(false);
