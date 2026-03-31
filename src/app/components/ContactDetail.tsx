@@ -695,7 +695,7 @@ export function ContactDetail({ contact, selectedEvent, contacts }: Props) {
                   <span className="text-sm font-bold text-gray-700">채점 근거</span>
                 </div>
                 <div className="space-y-3">
-                  {classifyResult.breakdown.map((item, idx) => {
+                  {classifyResult.breakdown.filter(item => item.label !== '100pt 상한 적용').map((item, idx) => {
                     const why = getBreakdownWhy(item.label, catKey, contactIndKey);
                     return (
                       <div key={idx}>
