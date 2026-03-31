@@ -199,7 +199,7 @@ export default function App() {
                 onClick={() => setDropdownOpen(o => !o)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#252525] border border-[#3a3a3a] text-gray-400 text-xs whitespace-nowrap transition-all hover:border-[#555] hover:text-gray-200 font-medium"
               >
-                <span className="text-gray-500 text-[10px] font-normal mr-0.5">분야</span>
+                <span className="text-gray-400 text-xs font-medium">분야 전체보기</span>
                 <ChevronDown className={`w-3 h-3 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 

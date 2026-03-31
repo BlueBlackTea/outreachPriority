@@ -687,7 +687,7 @@ export function ContactDetail({ contact, selectedEvent, contacts }: Props) {
 
             <div className="flex-1 flex flex-col overflow-hidden bg-white border-t">
               {/* 채점 근거 + 추천 영업 목적 — 고정 영역 */}
-              <div className="p-4 space-y-4 border-b border-gray-100">
+              <div className="flex-shrink-0 p-4 space-y-4 border-b border-gray-100">
               {/* 채점 근거 */}
               <div>
                 <div className="flex items-center gap-2 mb-3">
@@ -753,7 +753,7 @@ export function ContactDetail({ contact, selectedEvent, contacts }: Props) {
                     <span className="text-sm font-bold text-gray-700">분야별 적합도 비교</span>
                   </div>
                 </div>
-                <div className="flex-1 overflow-y-auto px-4 pb-4">
+                <div className="flex-1 overflow-y-auto px-4 pt-2 pb-4">
                 <div className="space-y-2.5">
                   {showScores.map(item => {
                     const isCurrent = item.key === catKey;
