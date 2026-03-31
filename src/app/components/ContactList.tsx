@@ -181,7 +181,7 @@ export function ContactList({
   }, [sortedContacts, onVisibleIdsChange]);
 
   return (
-    <div className="w-full md:w-[500px] border-r border-gray-200 bg-white flex flex-col flex-shrink-0 shadow-sm">
+    <div className="w-full md:w-[380px] border-r border-gray-200 bg-white flex flex-col flex-shrink-0 shadow-sm">
       {/* 버튼 행 */}
       <div className="p-3 border-b border-gray-100 flex gap-2">
         <Button
@@ -495,18 +495,18 @@ export function ContactList({
                     >
                       <div className="flex justify-between gap-2 items-start">
                         <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-sm text-gray-800 truncate">{contact.name}</div>
-                          <div className="text-xs text-gray-600 truncate mt-1">{contact.company}</div>
-                          <div className="text-xs text-gray-500 truncate mt-0.5">{contact.title}</div>
+                          <div className="font-semibold text-base text-gray-800 truncate">{contact.name}</div>
+                          <div className="text-sm text-gray-600 truncate mt-1">{contact.company}</div>
+                          <div className="text-sm text-gray-500 truncate mt-0.5">{contact.title}</div>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
                           <div className={`w-2 h-2 rounded-full ${gradeColor} mt-0.5`}></div>
-                          <span className="text-xs font-extrabold text-gray-600">{contact.score}pt</span>
+                          <span className="text-sm font-extrabold text-gray-600">{contact.score}pt</span>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 mt-2">
                         <span
-                          className="text-[11px] rounded px-1.5 py-0.5 whitespace-nowrap border font-medium"
+                          className="text-xs rounded px-1.5 py-0.5 whitespace-nowrap border font-medium"
                           style={{
                             background: tc.bg,
                             color: tc.text,
