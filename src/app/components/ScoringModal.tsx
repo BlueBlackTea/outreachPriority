@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
 import { TITLE_WEIGHTS, CONTACT_WEIGHTS, SHOW_WEIGHTS, INDUSTRY_LABELS } from '../lib/data';
-import { Settings2, X, Check } from 'lucide-react';
+import { Settings2, X, Check, Info } from 'lucide-react';
 import { useState, useMemo, useRef } from 'react';
 import { classifyContact } from '../lib/scoring';
 import type { Contact } from '../lib/types';
@@ -206,9 +206,18 @@ export function ScoringModal({ selectedEvent, contacts, onClose }: Props) {
             {/* 연락처 - 직함 앞으로 이동 */}
             <div className="bg-[#1A1A1A] rounded-lg p-4 shadow-md">
               <div className="text-xs font-extrabold text-[#E8470A] uppercase tracking-wider mb-3 flex justify-between items-center">
-                <span>📬 연락처</span>
+                <span className="flex items-center gap-1.5">
+                  📬 연락처
+                  <span className="relative group/tip">
+                    <Info className="w-3 h-3 text-gray-500 cursor-help" />
+                    <span className="pointer-events-none absolute left-0 top-full mt-1.5 z-50 hidden group-hover/tip:block w-64 bg-gray-900 text-white text-[11px] leading-relaxed rounded-lg p-3 shadow-xl">
+                      <strong className="text-orange-300">초기 세팅값의 근거:</strong><br />
+                      이메일+전화가 모두 있는 연락처는 데이터 완성도가 높아 즉시 접근 가능한 양질의 리드입니다. 연락처 정보가 없으면 실제 섭외 시도 자체가 어렵습니다.
+                    </span>
+                  </span>
+                </span>
                 <div className="flex items-center gap-2">
-                  <span>MAX 25pt</span>
+                  <span>MAX 20pt</span>
                   {editingSection === 'contact' ? (
                     <button
                       onClick={() => handleSave('contact')}
@@ -229,17 +238,17 @@ export function ScoringModal({ selectedEvent, contacts, onClose }: Props) {
                 </div>
               </div>
               <div className="space-y-2">
-                <ScoringLine 
-                  label="이메일 보유" 
-                  pts={contactWeights.emailOnly} 
-                  max={25}
+                <ScoringLine
+                  label="이메일 보유"
+                  pts={contactWeights.emailOnly}
+                  max={20}
                   isEditing={editingSection === 'contact'}
                   onPtsChange={(val) => setContactWeights({ ...contactWeights, emailOnly: val })}
                 />
-                <ScoringLine 
-                  label="전화번호 보유" 
-                  pts={contactWeights.phoneOnly} 
-                  max={25}
+                <ScoringLine
+                  label="전화번호 보유"
+                  pts={contactWeights.phoneOnly}
+                  max={20}
                   isEditing={editingSection === 'contact'}
                   onPtsChange={(val) => setContactWeights({ ...contactWeights, phoneOnly: val })}
                 />
@@ -249,9 +258,18 @@ export function ScoringModal({ selectedEvent, contacts, onClose }: Props) {
             {/* 직함 */}
             <div className="bg-[#1A1A1A] rounded-lg p-4 shadow-md">
               <div className="text-xs font-extrabold text-[#E8470A] uppercase tracking-wider mb-3 flex justify-between items-center">
-                <span>👤 직함</span>
+                <span className="flex items-center gap-1.5">
+                  👤 직함
+                  <span className="relative group/tip">
+                    <Info className="w-3 h-3 text-gray-500 cursor-help" />
+                    <span className="pointer-events-none absolute left-0 top-full mt-1.5 z-50 hidden group-hover/tip:block w-64 bg-gray-900 text-white text-[11px] leading-relaxed rounded-lg p-3 shadow-xl">
+                      <strong className="text-orange-300">초기 세팅값의 근거:</strong><br />
+                      대표·CEO 등 의사결정권자는 최종 수락까지 단계가 짧아 높은 점수를 부여합니다. 실무 담당자는 내부 검토가 필요해 리드타임이 길어집니다.
+                    </span>
+                  </span>
+                </span>
                 <div className="flex items-center gap-2">
-                  <span>MAX 30pt</span>
+                  <span>MAX 35pt</span>
                   {editingSection === 'title' ? (
                     <button
                       onClick={() => handleSave('title')}
@@ -275,28 +293,28 @@ export function ScoringModal({ selectedEvent, contacts, onClose }: Props) {
                 <ScoringLine 
                   label="대표 / CEO / Founder" 
                   pts={titleWeights.ceo} 
-                  max={30}
+                  max={35}
                   isEditing={editingSection === 'title'}
                   onPtsChange={(val) => setTitleWeights({ ...titleWeights, ceo: val })}
                 />
                 <ScoringLine 
                   label="이사 / Director / Manager" 
                   pts={titleWeights.director} 
-                  max={30}
+                  max={35}
                   isEditing={editingSection === 'title'}
                   onPtsChange={(val) => setTitleWeights({ ...titleWeights, director: val })}
                 />
                 <ScoringLine 
                   label="담당 / Specialist" 
                   pts={titleWeights.specialist} 
-                  max={30}
+                  max={35}
                   isEditing={editingSection === 'title'}
                   onPtsChange={(val) => setTitleWeights({ ...titleWeights, specialist: val })}
                 />
                 <ScoringLine 
                   label="기타" 
                   pts={titleWeights.other} 
-                  max={30}
+                  max={35}
                   isEditing={editingSection === 'title'}
                   onPtsChange={(val) => setTitleWeights({ ...titleWeights, other: val })}
                 />
@@ -308,7 +326,7 @@ export function ScoringModal({ selectedEvent, contacts, onClose }: Props) {
               <div className="text-xs font-extrabold text-[#E8470A] uppercase tracking-wider mb-3 flex justify-between items-center">
                 <span>🏢 업종</span>
                 <div className="flex items-center gap-2">
-                  <span>MAX 40pt</span>
+                  <span>MAX 45pt</span>
                   {editingSection === 'industry' ? (
                     <button
                       onClick={() => handleSave('industry')}
@@ -334,7 +352,7 @@ export function ScoringModal({ selectedEvent, contacts, onClose }: Props) {
                     key={key}
                     label={label} 
                     pts={industryWeightsEdited[key as keyof typeof industryWeightsEdited]} 
-                    max={40}
+                    max={45}
                     isEditing={editingSection === 'industry'}
                     onPtsChange={(val) => setIndustryWeightsEdited({ ...industryWeightsEdited, [key]: val })}
                   />
