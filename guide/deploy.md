@@ -8,8 +8,8 @@
 
 ```
 1. git status                        ← modified 파일 확인
-2. guide/handover.md 업데이트        ← 이번 작업 1~2줄 간략 기록 (필수!)
-3. git add <파일들> guide/handover.md
+2. guide/status.md 업데이트 + guide/log.md에 로그 추가  ← 필수!
+3. git add <파일들> guide/status.md guide/log.md
 4. git commit -m "..."
 5. git push origin main              → GitHub Actions 자동 빌드 → gh-pages 배포
 ```
