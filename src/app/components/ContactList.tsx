@@ -183,7 +183,7 @@ export function ContactList({
   }, [sortedContacts, onVisibleIdsChange]);
 
   return (
-    <div className="w-full md:w-[380px] border-r border-gray-200 bg-white flex flex-col flex-shrink-0 shadow-sm">
+    <div className="w-full md:w-[520px] border-r border-gray-200 bg-white flex flex-col flex-shrink-0 shadow-sm">
       {/* 필터 토글 헤더 */}
       <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between bg-gray-50 flex-shrink-0">
         <button

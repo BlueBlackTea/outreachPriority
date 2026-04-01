@@ -154,7 +154,7 @@ export default function App() {
       <Toaster position="top-right" richColors />
 
       {/* Tier 1: 제목부 */}
-      <div className="bg-[#1A1A1A] px-6 flex items-center gap-3 flex-shrink-0 shadow-md min-h-[60px] py-3">
+      <div className="bg-[#1A1A1A] px-6 flex items-center gap-3 flex-shrink-0 shadow-md min-h-[80px] py-3">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between w-full gap-3">
           <div className="flex items-center gap-3 flex-shrink-0">
             <span className="font-black text-lg text-[#E8470A] tracking-wide">섭외 DB 관리</span>

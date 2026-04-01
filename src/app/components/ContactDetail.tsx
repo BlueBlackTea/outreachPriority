@@ -426,14 +426,14 @@ export function ContactDetail({ contact, selectedEvent, contacts }: Props) {
   if (!contact || !classifyResult) {
     return (
       <div className="flex-1 overflow-y-auto bg-gray-50">
-        <div className="space-y-4 max-w-xl mx-auto pb-8">
+        <div className="space-y-4 max-w-3xl mx-auto pb-8">
 
           {/* 1) 온보딩 — 박스 없음 */}
           <div className="py-10 px-5 text-center">
-            <MousePointerClick className="w-8 h-8 text-orange-300 mx-auto mb-4" />
-            <div className="text-base font-semibold text-gray-700 mb-2">좌측 목록에서 연락처를 선택하세요</div>
-            <div className="text-sm text-gray-400 mb-6">선택하면 분야별 적합도 분석을 확인합니다</div>
-            <span className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1.5 text-xs text-amber-700 rounded-full font-medium">
+            <MousePointerClick className="w-12 h-12 text-orange-300 mx-auto mb-4" />
+            <div className="text-2xl font-bold text-gray-700 mb-2">좌측 목록에서 연락처를 선택하세요</div>
+            <div className="text-base text-gray-400 mb-6">선택하면 분야별 적합도 분석을 확인합니다</div>
+            <span className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1.5 text-sm text-amber-700 rounded-full font-medium">
               TIP &nbsp;↑↓ 화살표 키로 빠르게 탐색할 수 있습니다
             </span>
           </div>
@@ -442,12 +442,12 @@ export function ContactDetail({ contact, selectedEvent, contacts }: Props) {
           <div className="mx-5 bg-white rounded-xl border border-gray-200 shadow-sm p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2 text-gray-500">
-                <TrendingUp className="w-4 h-4" />
-                <span className="text-xs font-bold text-gray-700">점수 분포</span>
+                <TrendingUp className="w-5 h-5" />
+                <span className="text-sm font-bold text-gray-700">점수 분포</span>
               </div>
-              <div className="text-[10px] text-gray-400">{selectedEventLabel}</div>
+              <div className="text-sm text-gray-400">{selectedEventLabel}</div>
             </div>
-            <ResponsiveContainer width="100%" height={120}>
+            <ResponsiveContainer width="100%" height={160}>
               <AreaChart data={scoreData} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
                 <defs>
                   <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
@@ -457,19 +457,19 @@ export function ContactDetail({ contact, selectedEvent, contacts }: Props) {
                 </defs>
                 <XAxis
                   dataKey="range"
-                  tick={{ fontSize: 9, fill: '#9CA3AF' }}
+                  tick={{ fontSize: 14, fill: '#9CA3AF' }}
                   axisLine={false}
                   tickLine={false}
                 />
                 <YAxis
-                  tick={{ fontSize: 9, fill: '#9CA3AF' }}
+                  tick={{ fontSize: 14, fill: '#9CA3AF' }}
                   axisLine={false}
                   tickLine={false}
                   allowDecimals={false}
-                  width={20}
+                  width={28}
                 />
                 <Tooltip
-                  contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #e5e7eb', padding: '4px 10px' }}
+                  contentStyle={{ fontSize: 16, borderRadius: 8, border: '1px solid #e5e7eb', padding: '4px 10px' }}
                   formatter={(v: number) => [`${v}명`, '인원']}
                   labelFormatter={(l) => `${l}~${Number(l) + 9}점`}
                   cursor={{ stroke: '#E8470A', strokeWidth: 1, strokeDasharray: '3 3' }}
@@ -491,19 +491,19 @@ export function ContactDetail({ contact, selectedEvent, contacts }: Props) {
           <div className="mx-5 bg-white rounded-xl border border-gray-200 shadow-sm p-4">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2 text-gray-500">
-                <Building2 className="w-4 h-4" />
-                <span className="text-xs font-bold text-gray-700">업종 가중치 산출 근거</span>
+                <Building2 className="w-5 h-5" />
+                <span className="text-sm font-bold text-gray-700">업종 가중치 산출 근거</span>
               </div>
-              <div className="text-[10px] text-gray-400">{selectedEventLabel}</div>
+              <div className="text-sm text-gray-400">{selectedEventLabel}</div>
             </div>
             <div className="space-y-4">
               {industryPolicy.slice(0, 3).map(item => (
                 <div key={item.key}>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-bold text-gray-800">{item.label}</span>
-                    <span className="text-xs font-bold text-[#E8470A]">+{item.pts}pt</span>
+                    <span className="text-sm font-bold text-gray-800">{item.label}</span>
+                    <span className="text-sm font-bold text-[#E8470A]">+{item.pts}pt</span>
                   </div>
-                  <p className="text-xs text-gray-500 leading-relaxed">{getIndWhy(catKey, item.key)}</p>
+                  <p className="text-sm text-gray-500 leading-relaxed">{getIndWhy(catKey, item.key)}</p>
                 </div>
               ))}
             </div>
@@ -514,21 +514,21 @@ export function ContactDetail({ contact, selectedEvent, contacts }: Props) {
                     {industryPolicy.slice(3).map(item => (
                       <div key={item.key}>
                         <div className="flex items-center justify-between mb-0.5">
-                          <span className="text-xs font-semibold text-gray-600">{item.label}</span>
-                          <span className="text-xs font-bold text-gray-400">+{item.pts}pt</span>
+                          <span className="text-sm font-semibold text-gray-600">{item.label}</span>
+                          <span className="text-sm font-bold text-gray-400">+{item.pts}pt</span>
                         </div>
-                        <p className="text-xs text-gray-400 leading-relaxed">{getIndWhy(catKey, item.key)}</p>
+                        <p className="text-sm text-gray-400 leading-relaxed">{getIndWhy(catKey, item.key)}</p>
                       </div>
                     ))}
                   </div>
                 )}
                 <button
                   onClick={() => setShowMoreInd(v => !v)}
-                  className="mt-3 w-full flex items-center justify-center gap-1.5 border border-gray-200 rounded-lg px-3 py-2 text-xs font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors"
+                  className="mt-3 w-full flex items-center justify-center gap-1.5 border border-gray-200 rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors"
                 >
                   {showMoreInd
-                    ? <><ChevronUp className="w-3.5 h-3.5" />나머지 {industryPolicy.length - 3}개 업종 접기</>
-                    : <><ChevronDown className="w-3.5 h-3.5" />나머지 {industryPolicy.length - 3}개 업종 근거 보기</>
+                    ? <><ChevronUp className="w-4 h-4" />나머지 {industryPolicy.length - 3}개 업종 접기</>
+                    : <><ChevronDown className="w-4 h-4" />나머지 {industryPolicy.length - 3}개 업종 근거 보기</>
                   }
                 </button>
               </>
@@ -538,10 +538,10 @@ export function ContactDetail({ contact, selectedEvent, contacts }: Props) {
           {/* 5) 영업 유형 분류 기준 */}
           <div className="mx-5 bg-white rounded-xl border border-gray-200 shadow-sm p-4">
             <div className="flex items-center gap-2 mb-4 text-gray-500">
-              <Crosshair className="w-4 h-4" />
-              <span className="text-xs font-bold text-gray-700">영업 유형 분류 기준</span>
+              <Crosshair className="w-5 h-5" />
+              <span className="text-sm font-bold text-gray-700">영업 유형 분류 기준</span>
             </div>
-            <div className="text-xs text-gray-400 mb-3">명함의 <strong className="text-gray-600">업종·직함·회사명</strong> 키워드로 자동 판별</div>
+            <div className="text-sm text-gray-400 mb-3">명함의 <strong className="text-gray-600">업종·직함·회사명</strong> 키워드로 자동 판별</div>
             <div className="space-y-3">
               {([
                 { type: '부스', criteria: '자사 제품·서비스를 현장에서 직접 전시하고 바이어·관람객과 대면 영업 가능한 기업.', keywords: '업종: 반려동물·식품·의료·IT·화장품·제조 등. 아래 세 조건 외 사업체 기본값.' },
@@ -554,11 +554,11 @@ export function ContactDetail({ contact, selectedEvent, contacts }: Props) {
                   className="rounded-lg p-3 border"
                   style={{ background: TYPE_COLORS[item.type]?.bg, borderColor: TYPE_COLORS[item.type]?.border }}
                 >
-                  <div className="font-bold text-xs mb-1" style={{ color: TYPE_COLORS[item.type]?.text }}>
+                  <div className="font-bold text-sm mb-1" style={{ color: TYPE_COLORS[item.type]?.text }}>
                     {TYPE_COLORS[item.type]?.label}
                   </div>
-                  <p className="text-xs text-gray-600 mb-1">{item.criteria}</p>
-                  <p className="text-[10px] text-gray-400">{item.keywords}</p>
+                  <p className="text-sm text-gray-600 mb-1">{item.criteria}</p>
+                  <p className="text-sm text-gray-400">{item.keywords}</p>
                 </div>
               ))}
             </div>
@@ -608,7 +608,7 @@ export function ContactDetail({ contact, selectedEvent, contacts }: Props) {
                 src={contact.image_url}
                 alt={contact.name}
                 className="w-full h-full object-contain bg-gray-50"
-                style={{ maxHeight: 280 }}
+                style={{ maxHeight: 480 }}
               />
             ) : (
               <div className={`w-24 h-24 rounded-full flex items-center justify-center text-3xl font-black ${avatarColor}`}>
@@ -789,8 +789,8 @@ export function ContactDetail({ contact, selectedEvent, contacts }: Props) {
                   <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ${openSection === 'compare' ? 'rotate-180' : ''}`} />
                 </button>
                 {openSection === 'compare' && (
-                  <div className="relative flex-1 min-h-0">
-                  <div className="absolute inset-0 overflow-y-auto overscroll-contain px-4 pb-4 space-y-2.5">
+                  <div className="relative flex-1 min-h-0 bg-gray-100">
+                  <div className="absolute inset-0 overflow-y-auto overscroll-contain px-4 py-4 space-y-2.5">
                     {showScores.map(item => {
                       const isCurrent = item.key === catKey;
                       const barColor = item.score >= 70 ? 'bg-emerald-500' : item.score >= 40 ? 'bg-amber-400' : 'bg-red-400';

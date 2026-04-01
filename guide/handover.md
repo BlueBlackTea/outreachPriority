@@ -4,7 +4,7 @@
 
 ---
 
-## 현재 상태 (2026-03-31)
+## 현재 상태 (2026-04-01)
 
 ### 완료된 주요 기능
 - Supabase 로그인 + contacts 불러오기 / 엑셀 업로드 로드
@@ -14,13 +14,20 @@
 - Supabase Storage 이미지 연동 (157개 image_url 세팅)
 - 채점 가중치 편집 모달
 - GitHub Actions 자동 배포
+- 빔 프로젝터 대응 UI: --font-size 32px, ContactList 520px, 빈 상태 텍스트 업사이징
+- 분야별 적합도 비교 스크롤 상단 클리핑 버그 수정 (py-4), bg-gray-100 배경 추가
 
 ### 미완료 / 다음 후보
-- ContactDetail 폰트 크기 업사이징 + 좌우 카드 높이 맞추기
+- 없음
 
 ---
 
 ## 커밋 로그
+
+### 2026-04-01
+- 빔 프로젝터 대응: --font-size 32px 확대, ContactList 너비 520px, 빈 상태 화면 텍스트·아이콘 업사이징
+- 분야별 적합도 비교 스크롤 클리핑 버그 수정(py-4), 스크롤 영역 bg-gray-100 배경 추가
+- guide/deploy.md에 dev 서버 검증 기준 추가
 
 ### 2026-03-31
 - guide/ 문서 구조 정비 (start·handover·deploy 역할 분리, CLAUDE.md 루트 이동)
