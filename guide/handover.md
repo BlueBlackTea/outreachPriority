@@ -14,7 +14,7 @@
 - Supabase Storage 이미지 연동 (157개 image_url 세팅)
 - 채점 가중치 편집 모달
 - GitHub Actions 자동 배포
-- 빔 프로젝터 대응 UI: --font-size 24px(재조정), ContactList 780px, 빈 상태 텍스트 업사이징 + 스크롤 유도
+- 빔 프로젝터 대응 UI: --font-size 20px(최종조정), ContactList 780px, 빈 상태 텍스트 업사이징 + 스크롤 유도
 - 분야별 적합도 비교 스크롤 상단 클리핑 버그 수정 (py-4), bg-gray-100 배경 추가
 - 드롭다운 너비 340px, 채점근거 항목 라운드 박스화, 아코디언 상단 패딩·배경 통일
 
