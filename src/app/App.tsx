@@ -204,7 +204,7 @@ export default function App() {
               </button>
 
               {dropdownOpen && (
-                <div className="absolute top-full right-0 mt-1 bg-[#1a1a1a] border border-[#333] rounded-lg shadow-2xl z-50 min-w-[170px] py-1">
+                <div className="absolute top-full right-0 mt-1 bg-[#1a1a1a] border border-[#333] rounded-lg shadow-2xl z-50 min-w-[340px] py-1">
                   {SHOW_GROUPS.map(g => (
                     <div
                       key={g.key}

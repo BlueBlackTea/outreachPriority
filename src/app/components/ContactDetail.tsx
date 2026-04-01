@@ -425,7 +425,7 @@ export function ContactDetail({ contact, selectedEvent, contacts }: Props) {
   // ── 빈 상태 ──────────────────────────────────────────────────────────────
   if (!contact || !classifyResult) {
     return (
-      <div className="flex-1 overflow-y-auto bg-gray-50">
+      <div className="flex-1 overflow-y-auto bg-gray-50 relative">
         <div className="space-y-4 max-w-3xl mx-auto pb-8">
 
           {/* 1) 온보딩 — 박스 없음 */}
@@ -565,6 +565,11 @@ export function ContactDetail({ contact, selectedEvent, contacts }: Props) {
           </div>
 
         </div>
+
+          {/* 스크롤 유도 */}
+          <div className="pointer-events-none sticky bottom-0 inset-x-0 h-20 bg-gradient-to-t from-gray-200/80 to-transparent flex items-end justify-center pb-2">
+            <ChevronDown className="w-7 h-7 text-gray-400 animate-bounce" />
+          </div>
       </div>
     );
   }
@@ -704,11 +709,11 @@ export function ContactDetail({ contact, selectedEvent, contacts }: Props) {
                   <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ${openSection === 'breakdown' ? 'rotate-180' : ''}`} />
                 </button>
                 {openSection === 'breakdown' && (
-                  <div className="px-4 pb-4 space-y-3">
+                  <div className="px-4 py-4 space-y-3 bg-gray-50">
                     {classifyResult.breakdown.filter(item => item.label !== '100pt 상한 적용').map((item, idx) => {
                       const why = getBreakdownWhy(item.label, catKey, contactIndKey);
                       return (
-                        <div key={idx}>
+                        <div key={idx} className="bg-white rounded-lg border border-gray-100 px-3 py-2.5">
                           <div className="flex justify-between items-center mb-1">
                             <span className="text-base text-gray-600">{item.label}</span>
                             <span className={`text-base font-bold ${item.pts >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
@@ -754,7 +759,7 @@ export function ContactDetail({ contact, selectedEvent, contacts }: Props) {
                   <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ${openSection === 'purpose' ? 'rotate-180' : ''}`} />
                 </button>
                 {openSection === 'purpose' && (
-                  <div className="px-4 pb-4">
+                  <div className="px-4 py-4 bg-gray-50">
                     <div
                       className="rounded-lg p-3 border shadow-sm"
                       style={{
