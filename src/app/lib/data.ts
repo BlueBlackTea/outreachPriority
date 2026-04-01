@@ -339,48 +339,48 @@ const loadWeights = <T,>(key: string, defaultValue: T): T => {
 export const SHOW_WEIGHTS: Record<string, IndustryWeights> = loadWeights('show_weights', {
   // ── 반려동물 ──────────────────────────────────────────────────────────────
   megazoo:       { pet:45,trade:28,health:17,it:14,food:14,beauty:20,edu:7, mfg:9, media:14,camping:3,  other:3, coffee:6, baby:6, interior:3, construction:3, handmade:3, defense:2, environment:6, mechanical:3, surface:3, vr:3,  hotel:6, security:2, special:6  },
-  kpetfair:      { pet:51,trade:23,health:17,it:9, food:11,beauty:9, edu:9, mfg:6, media:9, camping:6,  other:3, coffee:3, baby:3, interior:2, construction:2, handmade:6, defense:2, environment:6, mechanical:2, surface:2, vr:3,  hotel:3, security:2, special:9  },
-  catfesta:      { pet:51,trade:17,health:11,it:6, food:9, beauty:9, edu:9, mfg:3, media:9, camping:6,  other:3, coffee:3, baby:3, interior:2, construction:2, handmade:11,defense:2, environment:3, mechanical:2, surface:2, vr:3,  hotel:3, security:2, special:6  },
-  catfair:       { pet:51,trade:17,health:11,it:6, food:9, beauty:9, edu:9, mfg:3, media:9, camping:6,  other:3, coffee:3, baby:3, interior:2, construction:2, handmade:9, defense:2, environment:3, mechanical:2, surface:2, vr:3,  hotel:3, security:2, special:6  },
-  daegupet:      { pet:51,trade:17,health:17,it:9, food:11,beauty:9, edu:9, mfg:6, media:9, camping:6,  other:3, coffee:3, baby:3, interior:2, construction:2, handmade:6, defense:2, environment:6, mechanical:2, surface:2, vr:3,  hotel:3, security:2, special:9  },
-  reptile:       { pet:51,trade:11,health:9, it:6, food:6, beauty:3, edu:17,mfg:3, media:6, camping:9,  other:6, coffee:2, baby:3, interior:2, construction:2, handmade:6, defense:2, environment:6, mechanical:2, surface:2, vr:3,  hotel:2, security:2, special:9  },
+  kpetfair:      { pet:45,trade:23,health:17,it:9, food:11,beauty:9, edu:9, mfg:6, media:9, camping:6,  other:3, coffee:3, baby:3, interior:2, construction:2, handmade:6, defense:2, environment:6, mechanical:2, surface:2, vr:3,  hotel:3, security:2, special:9  },
+  catfesta:      { pet:45,trade:17,health:11,it:6, food:9, beauty:9, edu:9, mfg:3, media:9, camping:6,  other:3, coffee:3, baby:3, interior:2, construction:2, handmade:11,defense:2, environment:3, mechanical:2, surface:2, vr:3,  hotel:3, security:2, special:6  },
+  catfair:       { pet:45,trade:17,health:11,it:6, food:9, beauty:9, edu:9, mfg:3, media:9, camping:6,  other:3, coffee:3, baby:3, interior:2, construction:2, handmade:9, defense:2, environment:3, mechanical:2, surface:2, vr:3,  hotel:3, security:2, special:6  },
+  daegupet:      { pet:45,trade:17,health:17,it:9, food:11,beauty:9, edu:9, mfg:6, media:9, camping:6,  other:3, coffee:3, baby:3, interior:2, construction:2, handmade:6, defense:2, environment:6, mechanical:2, surface:2, vr:3,  hotel:3, security:2, special:9  },
+  reptile:       { pet:45,trade:11,health:9, it:6, food:6, beauty:3, edu:17,mfg:3, media:6, camping:9,  other:6, coffee:2, baby:3, interior:2, construction:2, handmade:6, defense:2, environment:6, mechanical:2, surface:2, vr:3,  hotel:2, security:2, special:9  },
   // ── 영유아 ────────────────────────────────────────────────────────────────
-  kobebaby:      { pet:6, trade:17,health:23,it:9, food:17,beauty:17,edu:17,mfg:6, media:9, camping:3,  other:3, coffee:6, baby:51,interior:6, construction:2, handmade:9, defense:2, environment:6, mechanical:2, surface:2, vr:6,  hotel:3, security:2, special:6  },
-  daegubb:       { pet:6, trade:17,health:23,it:9, food:17,beauty:17,edu:17,mfg:6, media:9, camping:3,  other:3, coffee:6, baby:51,interior:6, construction:2, handmade:9, defense:2, environment:6, mechanical:2, surface:2, vr:6,  hotel:3, security:2, special:6  },
+  kobebaby:      { pet:6, trade:17,health:23,it:9, food:17,beauty:17,edu:17,mfg:6, media:9, camping:3,  other:3, coffee:6, baby:45,interior:6, construction:2, handmade:9, defense:2, environment:6, mechanical:2, surface:2, vr:6,  hotel:3, security:2, special:6  },
+  daegubb:       { pet:6, trade:17,health:23,it:9, food:17,beauty:17,edu:17,mfg:6, media:9, camping:3,  other:3, coffee:6, baby:45,interior:6, construction:2, handmade:9, defense:2, environment:6, mechanical:2, surface:2, vr:6,  hotel:3, security:2, special:6  },
   globalbaby:    { pet:6, trade:17,health:28,it:9, food:14,beauty:17,edu:17,mfg:6, media:9, camping:3,  other:3, coffee:3, baby:45,interior:6, construction:2, handmade:6, defense:2, environment:6, mechanical:2, surface:2, vr:6,  hotel:3, security:2, special:3  },
   // ── 커피·식음료 ───────────────────────────────────────────────────────────
-  coffeedessert: { pet:3, trade:17,health:9, it:6, food:34,beauty:6, edu:6, mfg:6, media:9, camping:6,  other:3, coffee:51,baby:3, interior:6, construction:2, handmade:6, defense:2, environment:3, mechanical:2, surface:2, vr:3,  hotel:17,security:2, special:11 },
+  coffeedessert: { pet:3, trade:17,health:9, it:6, food:34,beauty:6, edu:6, mfg:6, media:9, camping:6,  other:3, coffee:45,baby:3, interior:6, construction:2, handmade:6, defense:2, environment:3, mechanical:2, surface:2, vr:3,  hotel:17,security:2, special:11 },
   kfoodfest:     { pet:3, trade:17,health:11,it:6, food:45,beauty:6, edu:6, mfg:6, media:9, camping:6,  other:3, coffee:23,baby:6, interior:3, construction:2, handmade:3, defense:2, environment:6, mechanical:2, surface:2, vr:3,  hotel:11,security:2, special:11 },
   kfarm:         { pet:14,trade:14,health:9, it:23,food:39,beauty:3, edu:14,mfg:20,media:6, camping:6,  other:2, coffee:17,baby:3, interior:2, construction:2, handmade:3, defense:2, environment:9, mechanical:9, surface:3, vr:3,  hotel:6, security:2, special:17 },
   // ── 캠핑·아웃도어 ─────────────────────────────────────────────────────────
   gocaf:         { pet:17,trade:23,health:9, it:14,food:23,beauty:9, edu:6, mfg:17,media:11,camping:45, other:5, coffee:9, baby:3, interior:3, construction:3, handmade:6, defense:2, environment:9, mechanical:3, surface:3, vr:3,  hotel:6, security:2, special:11 },
   // ── 건축·건설·인테리어·설비 ───────────────────────────────────────────────
-  koreabuild:    { pet:2, trade:11,health:3, it:9, food:3, beauty:3, edu:6, mfg:17,media:9, camping:2,  other:3, coffee:2, baby:2, interior:23,construction:51,handmade:6, defense:6, environment:11,mechanical:17,surface:17,vr:6,  hotel:6, security:6, special:2  },
-  seoularch:     { pet:2, trade:11,health:3, it:9, food:3, beauty:3, edu:6, mfg:17,media:9, camping:2,  other:3, coffee:2, baby:2, interior:23,construction:51,handmade:6, defense:6, environment:11,mechanical:17,surface:17,vr:6,  hotel:6, security:6, special:2  },
+  koreabuild:    { pet:2, trade:11,health:3, it:9, food:3, beauty:3, edu:6, mfg:17,media:9, camping:2,  other:3, coffee:2, baby:2, interior:23,construction:45,handmade:6, defense:6, environment:11,mechanical:17,surface:17,vr:6,  hotel:6, security:6, special:2  },
+  seoularch:     { pet:2, trade:11,health:3, it:9, food:3, beauty:3, edu:6, mfg:17,media:9, camping:2,  other:3, coffee:2, baby:2, interior:23,construction:45,handmade:6, defense:6, environment:11,mechanical:17,surface:17,vr:6,  hotel:6, security:6, special:2  },
   kyunghyang:    { pet:3, trade:17,health:6, it:9, food:6, beauty:6, edu:6, mfg:17,media:9, camping:3,  other:3, coffee:3, baby:6, interior:45,construction:34,handmade:11,defense:3, environment:9, mechanical:11,surface:11,vr:6,  hotel:9, security:6, special:3  },
-  interiordesign:{ pet:2, trade:14,health:3, it:9, food:3, beauty:9, edu:6, mfg:11,media:11,camping:2,  other:3, coffee:3, baby:6, interior:51,construction:23,handmade:17,defense:2, environment:6, mechanical:9, surface:9, vr:6,  hotel:11,security:3, special:2  },
+  interiordesign:{ pet:2, trade:14,health:3, it:9, food:3, beauty:9, edu:6, mfg:11,media:11,camping:2,  other:3, coffee:3, baby:6, interior:45,construction:23,handmade:17,defense:2, environment:6, mechanical:9, surface:9, vr:6,  hotel:11,security:3, special:2  },
   spacedesign:   { pet:2, trade:14,health:3, it:9, food:3, beauty:9, edu:6, mfg:11,media:11,camping:2,  other:3, coffee:3, baby:6, interior:45,construction:23,handmade:17,defense:2, environment:6, mechanical:9, surface:9, vr:6,  hotel:11,security:3, special:2  },
   living:        { pet:3, trade:17,health:6, it:6, food:6, beauty:11,edu:6, mfg:9, media:9, camping:6,  other:3, coffee:6, baby:9, interior:45,construction:17,handmade:23,defense:2, environment:6, mechanical:6, surface:9, vr:3,  hotel:9, security:2, special:6  },
-  mechanical:    { pet:2, trade:11,health:6, it:17,food:3, beauty:2, edu:9, mfg:23,media:6, camping:2,  other:3, coffee:2, baby:2, interior:6, construction:23,handmade:2, defense:9, environment:9, mechanical:51,surface:11,vr:6,  hotel:3, security:6, special:2  },
+  mechanical:    { pet:2, trade:11,health:6, it:17,food:3, beauty:2, edu:9, mfg:23,media:6, camping:2,  other:3, coffee:2, baby:2, interior:6, construction:23,handmade:2, defense:9, environment:9, mechanical:45,surface:11,vr:6,  hotel:3, security:6, special:2  },
   material:      { pet:2, trade:9, health:3, it:9, food:3, beauty:6, edu:9, mfg:28,media:6, camping:2,  other:3, coffee:2, baby:2, interior:9, construction:17,handmade:6, defense:9, environment:9, mechanical:17,surface:45,vr:3,  hotel:2, security:6, special:2  },
   koindex:       { pet:3, trade:17,health:6, it:17,food:6, beauty:3, edu:6, mfg:34,media:9, camping:3,  other:6, coffee:2, baby:2, interior:9, construction:23,handmade:3, defense:11,environment:11,mechanical:23,surface:14,vr:6,  hotel:3, security:6, special:6  },
   // ── 핸드메이드·아트 ───────────────────────────────────────────────────────
-  illust:        { pet:6, trade:11,health:3, it:9, food:6, beauty:17,edu:17,mfg:3, media:17,camping:3,  other:3, coffee:6, baby:9, interior:9, construction:2, handmade:51,defense:2, environment:3, mechanical:2, surface:3, vr:9,  hotel:6, security:2, special:6  },
-  handart:       { pet:3, trade:11,health:3, it:6, food:6, beauty:17,edu:17,mfg:3, media:14,camping:3,  other:3, coffee:6, baby:6, interior:9, construction:2, handmade:51,defense:2, environment:3, mechanical:2, surface:3, vr:6,  hotel:6, security:2, special:6  },
-  bemyobj:       { pet:3, trade:11,health:3, it:6, food:6, beauty:17,edu:14,mfg:3, media:14,camping:3,  other:3, coffee:6, baby:6, interior:11,construction:2, handmade:51,defense:2, environment:3, mechanical:2, surface:3, vr:6,  hotel:6, security:2, special:6  },
+  illust:        { pet:6, trade:11,health:3, it:9, food:6, beauty:17,edu:17,mfg:3, media:17,camping:3,  other:3, coffee:6, baby:9, interior:9, construction:2, handmade:45,defense:2, environment:3, mechanical:2, surface:3, vr:9,  hotel:6, security:2, special:6  },
+  handart:       { pet:3, trade:11,health:3, it:6, food:6, beauty:17,edu:17,mfg:3, media:14,camping:3,  other:3, coffee:6, baby:6, interior:9, construction:2, handmade:45,defense:2, environment:3, mechanical:2, surface:3, vr:6,  hotel:6, security:2, special:6  },
+  bemyobj:       { pet:3, trade:11,health:3, it:6, food:6, beauty:17,edu:14,mfg:3, media:14,camping:3,  other:3, coffee:6, baby:6, interior:11,construction:2, handmade:45,defense:2, environment:3, mechanical:2, surface:3, vr:6,  hotel:6, security:2, special:6  },
   // ── 뷰티 ──────────────────────────────────────────────────────────────────
-  beautysome:    { pet:6, trade:23,health:9, it:9, food:6, beauty:51,edu:9, mfg:6, media:17,camping:2,  other:3, coffee:6, baby:6, interior:6, construction:2, handmade:11,defense:2, environment:3, mechanical:2, surface:6, vr:6,  hotel:6, security:2, special:6  },
+  beautysome:    { pet:6, trade:23,health:9, it:9, food:6, beauty:45,edu:9, mfg:6, media:17,camping:2,  other:3, coffee:6, baby:6, interior:6, construction:2, handmade:11,defense:2, environment:3, mechanical:2, surface:6, vr:6,  hotel:6, security:2, special:6  },
   // ── 의료·헬스 ─────────────────────────────────────────────────────────────
-  khf:           { pet:6, trade:9, health:51,it:32,food:6, beauty:6, edu:20,mfg:6, media:9, camping:2,  other:2, coffee:3, baby:11,interior:2, construction:2, handmade:2, defense:3, environment:6, mechanical:3, surface:2, vr:6,  hotel:3, security:3, special:2  },
+  khf:           { pet:6, trade:9, health:45,it:32,food:6, beauty:6, edu:20,mfg:6, media:9, camping:2,  other:2, coffee:3, baby:11,interior:2, construction:2, handmade:2, defense:3, environment:6, mechanical:3, surface:2, vr:6,  hotel:3, security:3, special:2  },
   // ── IT·VR·AI ──────────────────────────────────────────────────────────────
-  seoulai:       { pet:3, trade:9, health:11,it:51,food:3, beauty:3, edu:23,mfg:9, media:14,camping:2,  other:3, coffee:2, baby:3, interior:3, construction:3, handmade:2, defense:9, environment:6, mechanical:6, surface:3, vr:17, hotel:3, security:11,special:2  },
-  datacenter:    { pet:2, trade:9, health:6, it:51,food:2, beauty:2, edu:14,mfg:17,media:9, camping:2,  other:3, coffee:2, baby:2, interior:6, construction:11,handmade:2, defense:11,environment:6, mechanical:9, surface:3, vr:9,  hotel:3, security:17,special:2  },
+  seoulai:       { pet:3, trade:9, health:11,it:45,food:3, beauty:3, edu:23,mfg:9, media:14,camping:2,  other:3, coffee:2, baby:3, interior:3, construction:3, handmade:2, defense:9, environment:6, mechanical:6, surface:3, vr:17, hotel:3, security:11,special:2  },
+  datacenter:    { pet:2, trade:9, health:6, it:45,food:2, beauty:2, edu:14,mfg:17,media:9, camping:2,  other:3, coffee:2, baby:2, interior:6, construction:11,handmade:2, defense:11,environment:6, mechanical:9, surface:3, vr:9,  hotel:3, security:17,special:2  },
   // ── 환경·에너지 ───────────────────────────────────────────────────────────
-  esg:           { pet:3, trade:11,health:6, it:11,food:9, beauty:3, edu:9, mfg:17,media:9, camping:6,  other:3, coffee:2, baby:2, interior:9, construction:17,handmade:3, defense:6, environment:51,mechanical:9, surface:6, vr:3,  hotel:6, security:6, special:6  },
-  newenergy:     { pet:2, trade:11,health:3, it:11,food:3, beauty:2, edu:9, mfg:23,media:6, camping:3,  other:3, coffee:2, baby:2, interior:6, construction:14,handmade:2, defense:9, environment:51,mechanical:14,surface:6, vr:3,  hotel:3, security:6, special:3  },
+  esg:           { pet:3, trade:11,health:6, it:11,food:9, beauty:3, edu:9, mfg:17,media:9, camping:6,  other:3, coffee:2, baby:2, interior:9, construction:17,handmade:3, defense:6, environment:45,mechanical:9, surface:6, vr:3,  hotel:6, security:6, special:6  },
+  newenergy:     { pet:2, trade:11,health:3, it:11,food:3, beauty:2, edu:9, mfg:23,media:6, camping:3,  other:3, coffee:2, baby:2, interior:6, construction:14,handmade:2, defense:9, environment:45,mechanical:14,surface:6, vr:3,  hotel:3, security:6, special:3  },
   issa:          { pet:2, trade:11,health:17,it:9, food:6, beauty:6, edu:6, mfg:23,media:6, camping:3,  other:6, coffee:3, baby:2, interior:6, construction:9, handmade:2, defense:6, environment:39,mechanical:11,surface:9, vr:2,  hotel:17,security:9, special:2  },
   // ── 방위·보안 ─────────────────────────────────────────────────────────────
-  kadex:         { pet:2, trade:9, health:6, it:17,food:2, beauty:2, edu:6, mfg:23,media:6, camping:6,  other:3, coffee:2, baby:2, interior:3, construction:9, handmade:2, defense:56,environment:6, mechanical:14,surface:6, vr:6,  hotel:2, security:11,special:2  },
+  kadex:         { pet:2, trade:9, health:6, it:17,food:2, beauty:2, edu:6, mfg:23,media:6, camping:6,  other:3, coffee:2, baby:2, interior:3, construction:9, handmade:2, defense:45,environment:6, mechanical:14,surface:6, vr:6,  hotel:2, security:11,special:2  },
 });
 
 export const SHOW_GROUPS: ShowGroup[] = [
@@ -413,8 +413,9 @@ SHOW_GROUPS.forEach(g => { SHOW_WEIGHTS[g.key] = buildCategoryWeight(g.shows); }
 
 export const DEFAULT_SHOW_WEIGHTS: Record<string, IndustryWeights> = JSON.parse(JSON.stringify(SHOW_WEIGHTS));
 
-export const TITLE_WEIGHTS: TitleWeights = { ceo: 35, director: 23, specialist: 14, other: 9 };
-export const CONTACT_WEIGHTS: ContactWeights = { both: 20, emailOnly: 12, phoneOnly: 12 };
+export const GRADE_THRESHOLDS = loadWeights('grade_thresholds', { high: 70, low: 40 });
+export const TITLE_WEIGHTS: TitleWeights = loadWeights('title_weights', { ceo: 35, director: 23, specialist: 14, other: 9 });
+export const CONTACT_WEIGHTS: ContactWeights = loadWeights('contact_weights', { both: 20, emailOnly: 12, phoneOnly: 12 });
 
 export const INDUSTRY_LABELS: Record<keyof IndustryWeights, string> = {
   pet:          '반려동물/펫케어',

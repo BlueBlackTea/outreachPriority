@@ -4,6 +4,12 @@
 
 ---
 
+### 2026-04-01 (2)
+- ScoringModal handleSave 실구현: GRADE_THRESHOLDS·TITLE_WEIGHTS·CONTACT_WEIGHTS localStorage 저장 + forceRescore 반영
+- GRADE_THRESHOLDS loadWeights 기반 추가, scoring.ts 하드코딩 70/40 → 변수 사용
+- 핵심 업종 가중치 45pt 상한 캡 전체 적용 (51→45, 56→45)
+- 전화번호 클릭 복사 toast 구현, WeightEditorModal 슬라이더 max 45pt
+
 ### 2026-04-01
 - 빔 프로젝터 대응: --font-size 32px→24px→20px 순차 조정, ContactList 너비 520→780→624px
 - 분야별 적합도 비교 스크롤 클리핑 버그 수정(py-4), bg-gray-100 배경 추가

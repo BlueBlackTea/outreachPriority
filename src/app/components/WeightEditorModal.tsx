@@ -57,7 +57,7 @@ export function WeightEditorModal({ selectedEvent, onClose, onSave }: Props) {
                   value={[weights[key]]}
                   onValueChange={(vals) => handleWeightChange(key, vals[0])}
                   min={0}
-                  max={50}
+                  max={45}
                   step={1}
                   className="flex-1"
                 />
@@ -66,7 +66,7 @@ export function WeightEditorModal({ selectedEvent, onClose, onSave }: Props) {
                   value={weights[key]}
                   onChange={(e) => handleWeightChange(key, parseInt(e.target.value) || 0)}
                   min={0}
-                  max={50}
+                  max={45}
                   className="w-16 text-sm text-center font-bold text-[#E8470A] border-[#E8470A33]"
                 />
               </div>

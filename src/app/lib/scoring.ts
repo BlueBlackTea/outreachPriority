@@ -1,5 +1,5 @@
 import { Contact, ClassifyResult } from './types';
-import { SHOW_WEIGHTS, TITLE_WEIGHTS, CONTACT_WEIGHTS } from './data';
+import { SHOW_WEIGHTS, TITLE_WEIGHTS, CONTACT_WEIGHTS, GRADE_THRESHOLDS } from './data';
 
 export function classifyContact(contact: Contact, eventId: string): ClassifyResult {
   let score = 0;
@@ -169,7 +169,7 @@ export function classifyContact(contact: Contact, eventId: string): ClassifyResu
     score = 100;
   }
 
-  const grade = score >= 70 ? 'high' : score >= 40 ? 'mid' : 'low';
+  const grade = score >= GRADE_THRESHOLDS.high ? 'high' : score >= GRADE_THRESHOLDS.low ? 'mid' : 'low';
 
   // 영업 목적 판정
   let suggestedType: '' | '부스' | '바이어' | '미디어' = '부스';

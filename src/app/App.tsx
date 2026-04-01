@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Toaster } from './components/ui/sonner';
 import { ContactList } from './components/ContactList';
 import { ContactDetail } from './components/ContactDetail';
@@ -25,9 +25,15 @@ export default function App() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [visibleContactIds, setVisibleContactIds] = useState<number[]>([]);
+  const [scoreVersion, setScoreVersion] = useState(0);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [hoveredGroup, setHoveredGroup] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const forceRescore = useCallback(() => {
+    setContacts(c => [...c]);
+    setScoreVersion(v => v + 1);
+  }, []);
 
   const top3Categories = useMemo(() => {
     return SHOW_GROUPS
@@ -290,6 +296,7 @@ export default function App() {
           contact={selectedContact}
           selectedEvent={selectedEvent}
           contacts={contacts}
+          scoreVersion={scoreVersion}
         />
       </div>
 
@@ -298,10 +305,7 @@ export default function App() {
         <WeightEditorModal
           selectedEvent={selectedEvent}
           onClose={() => setShowWeightModal(false)}
-          onSave={() => {
-            // 가중치 저장 후 재채점
-            setContacts([...contacts]);
-          }}
+          onSave={forceRescore}
         />
       )}
 
@@ -310,6 +314,7 @@ export default function App() {
           selectedEvent={selectedEvent}
           contacts={contacts}
           onClose={() => setShowScoringModal(false)}
+          onSave={forceRescore}
           onOpenWeightEditor={() => {
             setShowScoringModal(false);
             setShowWeightModal(true);

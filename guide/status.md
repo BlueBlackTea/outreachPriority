@@ -16,6 +16,11 @@
 - 분야별 적합도 비교: 스크롤 클리핑 수정, bg-gray-100 배경
 - 드롭다운 너비 340px, 채점근거 라운드 박스, 아코디언 bg-gray-50
 - 명함 카드 툴팁 제거, 필터 명함 클릭 시에만 자동 접힘
+- ScoringModal handleSave 실구현: 가중치 localStorage 저장 + 즉시 재채점 반영
+- GRADE_THRESHOLDS loadWeights 기반 (localStorage 세션 유지)
+- 핵심 업종 가중치 45pt 상한 캡 (51→45, 56→45)
+- 전화번호 클릭 복사 (email과 동일)
+- WeightEditorModal 슬라이더 max 45pt
 
 ## 미완료 / 다음 후보
 - 없음

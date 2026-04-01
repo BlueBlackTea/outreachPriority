@@ -1,5 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
-import { TITLE_WEIGHTS, CONTACT_WEIGHTS, SHOW_WEIGHTS, INDUSTRY_LABELS } from '../lib/data';
+import { toast } from 'sonner';
+import { TITLE_WEIGHTS, CONTACT_WEIGHTS, SHOW_WEIGHTS, INDUSTRY_LABELS, GRADE_THRESHOLDS } from '../lib/data';
 import { Settings2, X, Check, Info } from 'lucide-react';
 import { useState, useMemo, useRef } from 'react';
 import { classifyContact } from '../lib/scoring';
@@ -9,6 +10,7 @@ interface Props {
   selectedEvent: string;
   contacts: Contact[];
   onClose: () => void;
+  onSave?: () => void;
   onOpenWeightEditor?: () => void;
 }
 
@@ -33,7 +35,7 @@ function useDragNumber(value: number, onChange: (v: number) => void, min = 0, ma
   return { onMouseDown, style: { cursor: 'ns-resize', userSelect: 'none' as const } };
 }
 
-export function ScoringModal({ selectedEvent, contacts, onClose }: Props) {
+export function ScoringModal({ selectedEvent, contacts, onClose, onSave }: Props) {
   const industryWeights = SHOW_WEIGHTS[selectedEvent];
   
   // 편집 상태 관리
@@ -45,7 +47,7 @@ export function ScoringModal({ selectedEvent, contacts, onClose }: Props) {
   const [industryWeightsEdited, setIndustryWeightsEdited] = useState({ ...industryWeights });
   
   // 등급 기준 점수
-  const [gradeThresholds, setGradeThresholds] = useState({ high: 70, low: 40 });
+  const [gradeThresholds, setGradeThresholds] = useState({ high: GRADE_THRESHOLDS.high, low: GRADE_THRESHOLDS.low });
 
   const highDrag = useDragNumber(gradeThresholds.high, (v) =>
     setGradeThresholds(prev => ({ high: v, low: v <= prev.low ? Math.max(0, v - 1) : prev.low }))
@@ -65,8 +67,24 @@ export function ScoringModal({ selectedEvent, contacts, onClose }: Props) {
   const lowCount  = eventScores.filter(s => s < gradeThresholds.low).length;
 
   const handleSave = (section: 'grade' | 'title' | 'industry' | 'contact') => {
-    // TODO: 실제 저장 로직 (예: API 호출, localStorage 등)
-    console.log('Saving weights for', section);
+    if (section === 'grade') {
+      Object.assign(GRADE_THRESHOLDS, gradeThresholds);
+      localStorage.setItem('grade_thresholds', JSON.stringify(gradeThresholds));
+    }
+    if (section === 'title') {
+      Object.assign(TITLE_WEIGHTS, titleWeights);
+      localStorage.setItem('title_weights', JSON.stringify(titleWeights));
+    }
+    if (section === 'contact') {
+      Object.assign(CONTACT_WEIGHTS, contactWeights);
+      localStorage.setItem('contact_weights', JSON.stringify(contactWeights));
+    }
+    if (section === 'industry') {
+      SHOW_WEIGHTS[selectedEvent] = industryWeightsEdited;
+      localStorage.setItem('show_weights', JSON.stringify(SHOW_WEIGHTS));
+    }
+    toast.success('저장되었습니다', { description: '점수가 재계산됩니다' });
+    onSave?.();
     setEditingSection(null);
   };
 

@@ -349,9 +349,10 @@ interface Props {
   contact: Contact | null;
   selectedEvent: string;
   contacts: Contact[];
+  scoreVersion?: number;
 }
 
-export function ContactDetail({ contact, selectedEvent, contacts }: Props) {
+export function ContactDetail({ contact, selectedEvent, contacts, scoreVersion }: Props) {
   const [localSeries, setLocalSeries] = useState('');
 
   useEffect(() => {
@@ -368,7 +369,8 @@ export function ContactDetail({ contact, selectedEvent, contacts }: Props) {
   const classifyResult = useMemo(() => {
     if (!contact) return null;
     return classifyContact(contact, selectedEvent);
-  }, [contact, selectedEvent]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contact, selectedEvent, scoreVersion]);
 
   // 선택 분야 라벨
   const selectedEventLabel = useMemo(() => {
@@ -421,7 +423,8 @@ export function ContactDetail({ contact, selectedEvent, contacts }: Props) {
       emoji: group.emoji,
       score: classifyContact(contact, group.key).score,
     })).sort((a, b) => b.score - a.score);
-  }, [contact]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contact, scoreVersion]);
 
   // ── 빈 상태 ──────────────────────────────────────────────────────────────
   if (!contact || !classifyResult) {
@@ -661,10 +664,16 @@ export function ContactDetail({ contact, selectedEvent, contacts }: Props) {
               </button>
             )}
             {contact.phone && (
-              <div className="text-base text-gray-600 flex items-center gap-2 px-2 py-1.5">
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(contact.phone!);
+                  toast.success('전화번호가 복사되었습니다', { description: contact.phone });
+                }}
+                className="w-full text-left text-base text-gray-600 flex items-center gap-2 hover:text-[#E8470A] hover:bg-orange-50 px-2 py-1.5 rounded-lg transition-colors"
+              >
                 <Phone className="w-4 h-4 flex-shrink-0" />
-                {contact.phone}
-              </div>
+                <span className="truncate">{contact.phone}</span>
+              </button>
             )}
             {contact.website && (
               <a

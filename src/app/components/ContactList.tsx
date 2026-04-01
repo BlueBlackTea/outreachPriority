@@ -77,8 +77,7 @@ export function ContactList({
 
       // 등급 필터
       if (gradeFilter !== 'all') {
-        const grade = contact.score >= 70 ? 'high' : contact.score >= 40 ? 'mid' : 'low';
-        if (grade !== gradeFilter) return false;
+        if (contact.grade !== gradeFilter) return false;
       }
 
       return true;
@@ -146,7 +145,7 @@ export function ContactList({
   const gradeCounts = useMemo(() => {
     const counts = { high: 0, mid: 0, low: 0 };
     contactsWithScores.forEach((c) => {
-      const grade = c.score >= 70 ? 'high' : c.score >= 40 ? 'mid' : 'low';
+      const grade = c.grade as 'high' | 'mid' | 'low';
       counts[grade]++;
     });
     return counts;
@@ -494,7 +493,7 @@ export function ContactList({
           </div>
         ) : (
           sortedContacts.map((contact) => {
-            const grade = contact.score >= 70 ? 'high' : contact.score >= 40 ? 'mid' : 'low';
+            const grade = contact.grade as 'high' | 'mid' | 'low';
             const gradeColor = grade === 'high' ? 'bg-emerald-500' : grade === 'mid' ? 'bg-amber-500' : 'bg-red-500';
             const tc = TYPE_COLORS[contact.type] || TYPE_COLORS['부스'];
 
