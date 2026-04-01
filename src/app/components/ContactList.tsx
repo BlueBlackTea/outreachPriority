@@ -8,7 +8,6 @@ import { Button } from './ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
 import { Search, FileSpreadsheet, Download, X, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { parseExcelFile, EXCEL_TEMPLATE_HEADERS } from '../lib/excelUtils';
 
 interface Props {
@@ -112,7 +111,6 @@ export function ContactList({
       setSortKey(key);
       setSortDir(1);
     }
-    setFilterOpen(false);
   };
 
   const handleDownloadTemplate = () => {
@@ -227,7 +225,7 @@ export function ContactList({
           <CollapsibleContent>
             {/* 유형 및 국가 필터 */}
             <div className="mt-3 flex gap-2">
-              <Select value={filterType} onValueChange={(v) => { setFilterType(v); setFilterOpen(false); }}>
+              <Select value={filterType} onValueChange={(v) => { setFilterType(v); }}>
                 <SelectTrigger className="flex-1 text-sm h-9 border-gray-300 bg-white">
                   <SelectValue />
                 </SelectTrigger>
@@ -238,7 +236,7 @@ export function ContactList({
                   <SelectItem value="미디어">미디어</SelectItem>
                 </SelectContent>
               </Select>
-              <Select value={filterCountry} onValueChange={(v) => { setFilterCountry(v); setFilterOpen(false); }}>
+              <Select value={filterCountry} onValueChange={(v) => { setFilterCountry(v); }}>
                 <SelectTrigger className="flex-1 text-sm h-9 border-gray-300 bg-white">
                   <SelectValue placeholder="전체 국가" />
                 </SelectTrigger>
@@ -296,7 +294,7 @@ export function ContactList({
         <div className="hidden lg:block">
           {/* 유형 및 국가 필터 */}
           <div className="mt-3 flex gap-2">
-            <Select value={filterType} onValueChange={(v) => { setFilterType(v); setFilterOpen(false); }}>
+            <Select value={filterType} onValueChange={(v) => { setFilterType(v); }}>
               <SelectTrigger className="flex-1 text-sm h-9 border-gray-300 bg-white">
                 <SelectValue />
               </SelectTrigger>
@@ -307,7 +305,7 @@ export function ContactList({
                 <SelectItem value="미디어">미디어</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={filterCountry} onValueChange={(v) => { setFilterCountry(v); setFilterOpen(false); }}>
+            <Select value={filterCountry} onValueChange={(v) => { setFilterCountry(v); }}>
               <SelectTrigger className="flex-1 text-sm h-9 border-gray-300 bg-white">
                 <SelectValue placeholder="전체 국가" />
               </SelectTrigger>
@@ -363,7 +361,7 @@ export function ContactList({
         </div>
         <div className="flex flex-col gap-2">
           <button
-            onClick={() => { setGradeFilter('all'); setFilterOpen(false); }}
+            onClick={() => { setGradeFilter('all'); }}
             className={`text-sm px-3 py-2 rounded-lg border-[1.5px] font-semibold transition-all flex items-center justify-center gap-2 shadow-sm ${
               gradeFilter === 'all'
                 ? 'text-white'
@@ -379,7 +377,7 @@ export function ContactList({
           </button>
           <div className="flex gap-2">
             <button
-              onClick={() => { setGradeFilter('high'); setFilterOpen(false); }}
+              onClick={() => { setGradeFilter('high'); }}
               className={`flex-1 text-sm px-3 py-2 rounded-lg border-[1.5px] font-semibold transition-all flex items-center justify-center gap-1 shadow-sm ${
                 gradeFilter === 'high'
                   ? 'bg-emerald-600 text-white border-emerald-600'
@@ -390,7 +388,7 @@ export function ContactList({
               <span className="text-xs opacity-75 font-bold">({gradeCounts.high})</span>
             </button>
             <button
-              onClick={() => { setGradeFilter('mid'); setFilterOpen(false); }}
+              onClick={() => { setGradeFilter('mid'); }}
               className={`flex-1 text-sm px-3 py-2 rounded-lg border-[1.5px] font-semibold transition-all flex items-center justify-center gap-1 shadow-sm ${
                 gradeFilter === 'mid'
                   ? 'bg-amber-600 text-white border-amber-600'
@@ -401,7 +399,7 @@ export function ContactList({
               <span className="text-xs opacity-75 font-bold">({gradeCounts.mid})</span>
             </button>
             <button
-              onClick={() => { setGradeFilter('low'); setFilterOpen(false); }}
+              onClick={() => { setGradeFilter('low'); }}
               className={`flex-1 text-sm px-3 py-2 rounded-lg border-[1.5px] font-semibold transition-all flex items-center justify-center gap-1 shadow-sm ${
                 gradeFilter === 'low'
                   ? 'bg-red-600 text-white border-red-600'
@@ -501,54 +499,44 @@ export function ContactList({
             const tc = TYPE_COLORS[contact.type] || TYPE_COLORS['부스'];
 
             return (
-              <TooltipProvider key={contact.id} delayDuration={300}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div
-                      ref={el => {
-                        if (el) cardRefs.current.set(contact.id, el);
-                        else cardRefs.current.delete(contact.id);
-                      }}
-                      onClick={() => { onSelectContact(contact.id); setFilterOpen(false); }}
-                      className={`px-4 py-3 border-b border-gray-50 cursor-pointer border-l-[3px] transition-all hover:shadow-sm ${
-                        selectedId === contact.id
-                          ? 'bg-[#FFF4EE] border-l-[#E8470A] shadow-sm'
-                          : 'border-l-transparent hover:bg-[#FFF9F7]'
-                      }`}
-                    >
-                      <div className="flex justify-between gap-2 items-start">
-                        <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-base text-gray-800 truncate">{contact.name}</div>
-                          <div className="text-sm text-gray-600 truncate mt-1">{contact.company}</div>
-                          <div className="text-sm text-gray-500 truncate mt-0.5">{contact.title}</div>
-                        </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <div className={`w-2 h-2 rounded-full ${gradeColor} mt-0.5`}></div>
-                          <span className="text-sm font-extrabold text-gray-600">{contact.score}pt</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 mt-2">
-                        <span
-                          className="text-xs rounded px-1.5 py-0.5 whitespace-nowrap border font-medium"
-                          style={{
-                            background: tc.bg,
-                            color: tc.text,
-                            borderColor: tc.border,
-                          }}
-                        >
-                          {tc.label}
-                        </span>
-                        <span className="text-xs text-gray-500">{FLAGS[contact.country] || ''}</span>
-                      </div>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent side="right" className="bg-[#1A1A1A] text-white border-none">
-                    <div className="text-xs text-gray-300 mb-1">섭외 우선순위 점수</div>
-                    <div className="text-base font-bold text-[#F97316]">{contact.score}pt</div>
-                    <div className="text-xs text-gray-400 mt-1">클릭하여 상세보기</div>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <div
+                key={contact.id}
+                ref={el => {
+                  if (el) cardRefs.current.set(contact.id, el);
+                  else cardRefs.current.delete(contact.id);
+                }}
+                onClick={() => { onSelectContact(contact.id); setFilterOpen(false); }}
+                className={`px-4 py-3 border-b border-gray-50 cursor-pointer border-l-[3px] transition-all hover:shadow-sm ${
+                  selectedId === contact.id
+                    ? 'bg-[#FFF4EE] border-l-[#E8470A] shadow-sm'
+                    : 'border-l-transparent hover:bg-[#FFF9F7]'
+                }`}
+              >
+                <div className="flex justify-between gap-2 items-start">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-base text-gray-800 truncate">{contact.name}</div>
+                    <div className="text-sm text-gray-600 truncate mt-1">{contact.company}</div>
+                    <div className="text-sm text-gray-500 truncate mt-0.5">{contact.title}</div>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className={`w-2 h-2 rounded-full ${gradeColor} mt-0.5`}></div>
+                    <span className="text-sm font-extrabold text-gray-600">{contact.score}pt</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 mt-2">
+                  <span
+                    className="text-xs rounded px-1.5 py-0.5 whitespace-nowrap border font-medium"
+                    style={{
+                      background: tc.bg,
+                      color: tc.text,
+                      borderColor: tc.border,
+                    }}
+                  >
+                    {tc.label}
+                  </span>
+                  <span className="text-xs text-gray-500">{FLAGS[contact.country] || ''}</span>
+                </div>
+              </div>
             );
           })
         )}
