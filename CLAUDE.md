@@ -6,8 +6,6 @@
 3. 사용자 요청 수행
 4. 커밋 전 `guide/status.md` 업데이트 + `guide/log.md`에 로그 1~2줄 추가
 
-> 맥락 없이 행동하거나 같은 실수를 반복할 경우에만 `guide/log.md` 읽기
-
 ---
 
 ## 목적
@@ -28,7 +26,7 @@ outreachPriority/
 │       └── App.tsx       # 루트 컴포넌트
 ├── guide/
 │   ├── status.md         # 현재 상태 (매 세션 필독)
-│   ├── log.md            # 커밋 로그 누적 (문제 시에만 읽기)
+│   ├── log.md            # 커밋 로그 누적
 │   ├── agents.md         # 에이전트 역할 분담
 │   ├── deploy.md         # 배포 가이드
 │   └── scoring-policy.md # 채점 정책
