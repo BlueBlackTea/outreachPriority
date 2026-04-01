@@ -48,6 +48,7 @@ export function ContactList({
   const [filterOpen, setFilterOpen] = useState(true);
   const [showExcelModal, setShowExcelModal] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [isListAtBottom, setIsListAtBottom] = useState(false);
 
   // 점수 계산 및 우선순위 적용
   const contactsWithScores = useMemo(() => {
@@ -183,7 +184,7 @@ export function ContactList({
   }, [sortedContacts, onVisibleIdsChange]);
 
   return (
-    <div className="w-full md:w-[780px] border-r border-gray-200 bg-white flex flex-col flex-shrink-0 shadow-sm">
+    <div className="w-full md:w-[624px] border-r border-gray-200 bg-white flex flex-col flex-shrink-0 shadow-sm relative">
       {/* 필터 토글 헤더 */}
       <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between bg-gray-50 flex-shrink-0">
         <button
@@ -479,7 +480,14 @@ export function ContactList({
       )}
 
       {/* 연락처 리스트 */}
-      <div className="flex-1 overflow-y-auto" ref={listRef}>
+      <div
+        className="flex-1 overflow-y-auto"
+        ref={listRef}
+        onScroll={e => {
+          const el = e.currentTarget;
+          setIsListAtBottom(el.scrollTop + el.clientHeight >= el.scrollHeight - 20);
+        }}
+      >
         {sortedContacts.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center px-6 py-12">
             <div className="text-5xl mb-4">🔍</div>
@@ -545,6 +553,11 @@ export function ContactList({
           })
         )}
       </div>
+      {!isListAtBottom && (
+        <div className="pointer-events-none absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-white to-transparent flex items-end justify-center pb-2">
+          <ChevronDown className="w-5 h-5 text-gray-300 animate-bounce" />
+        </div>
+      )}
     </div>
   );
 }
