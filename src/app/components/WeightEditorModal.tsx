@@ -28,7 +28,7 @@ export function WeightEditorModal({ selectedEvent, onClose, onSave }: Props) {
 
   const handleReset = () => {
     setWeights(DEFAULT_SHOW_WEIGHTS[selectedEvent]);
-    toast.info('기본값으로 초기화되었습니다');
+    toast.info('기본값으로 재설정했습니다', { description: '저장 및 재산정을 눌러야 반영됩니다' });
   };
 
   const handleSave = () => {

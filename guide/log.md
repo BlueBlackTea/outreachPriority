@@ -4,6 +4,9 @@
 
 ---
 
+### 2026-04-02 (2)
+- 사용성 검토: 이미지 로드 실패 시 ImageWithFallback 적용, WeightEditorModal 토스트 명확화, localSeries 죽은코드 제거
+
 ### 2026-04-02
 - 점수 분포 차트 Y축 제거 (") 노이즈 해결), 타이틀 → "등록된 연락처 점수 분포"
 - 우측 패널 스크롤 유도 sticky→absolute + opacity transition 으로 덜걱 현상 수정
