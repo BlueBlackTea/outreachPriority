@@ -453,12 +453,12 @@ export function ContactDetail({ contact, selectedEvent, contacts, scoreVersion }
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2 text-gray-500">
                 <TrendingUp className="w-5 h-5" />
-                <span className="text-sm font-bold text-gray-700">점수 분포</span>
+                <span className="text-sm font-bold text-gray-700">등록된 연락처 점수 분포</span>
               </div>
               <div className="text-sm text-gray-400">{selectedEventLabel}</div>
             </div>
             <ResponsiveContainer width="100%" height={160}>
-              <AreaChart data={scoreData} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
+              <AreaChart data={scoreData} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
                 <defs>
                   <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#10B981" stopOpacity={0.25} />
@@ -471,13 +471,7 @@ export function ContactDetail({ contact, selectedEvent, contacts, scoreVersion }
                   axisLine={false}
                   tickLine={false}
                 />
-                <YAxis
-                  tick={{ fontSize: 14, fill: '#9CA3AF' }}
-                  axisLine={false}
-                  tickLine={false}
-                  allowDecimals={false}
-                  width={28}
-                />
+                <YAxis hide />
                 <Tooltip
                   contentStyle={{ fontSize: 16, borderRadius: 8, border: '1px solid #e5e7eb', padding: '4px 10px' }}
                   formatter={(v: number) => [`${v}명`, '인원']}
@@ -577,11 +571,12 @@ export function ContactDetail({ contact, selectedEvent, contacts, scoreVersion }
         </div>
 
           {/* 스크롤 유도 */}
-          {!isEmptyAtBottom && (
-            <div className="pointer-events-none sticky bottom-0 inset-x-0 h-20 bg-gradient-to-t from-gray-200/80 to-transparent flex items-end justify-center pb-2">
-              <ChevronDown className="w-7 h-7 text-gray-400 animate-bounce" />
-            </div>
-          )}
+          <div
+            className="pointer-events-none absolute bottom-0 inset-x-0 h-20 bg-gradient-to-t from-gray-200/80 to-transparent flex items-end justify-center pb-2 transition-opacity duration-300"
+            style={{ opacity: isEmptyAtBottom ? 0 : 1 }}
+          >
+            <ChevronDown className="w-7 h-7 text-gray-400 animate-bounce" />
+          </div>
       </div>
     );
   }

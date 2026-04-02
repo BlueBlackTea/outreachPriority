@@ -4,6 +4,10 @@
 
 ---
 
+### 2026-04-02
+- 점수 분포 차트 Y축 제거 (") 노이즈 해결), 타이틀 → "등록된 연락처 점수 분포"
+- 우측 패널 스크롤 유도 sticky→absolute + opacity transition 으로 덜걱 현상 수정
+
 ### 2026-04-01 (2)
 - ScoringModal handleSave 실구현: GRADE_THRESHOLDS·TITLE_WEIGHTS·CONTACT_WEIGHTS localStorage 저장 + forceRescore 반영
 - GRADE_THRESHOLDS loadWeights 기반 추가, scoring.ts 하드코딩 70/40 → 변수 사용
