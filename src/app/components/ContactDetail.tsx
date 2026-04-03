@@ -578,7 +578,7 @@ export function ContactDetail({ contact, selectedEvent, contacts, scoreVersion }
 
           {/* 스크롤 유도 */}
           {!isEmptyAtBottom && (
-            <div className="pointer-events-none sticky bottom-0 inset-x-0 h-20 bg-gradient-to-t from-gray-200/80 to-transparent flex items-end justify-center pb-2">
+            <div className="pointer-events-none absolute bottom-0 inset-x-0 h-20 bg-gradient-to-t from-gray-200/80 to-transparent flex items-end justify-center pb-2">
               <ChevronDown className="w-7 h-7 text-gray-400 animate-bounce" />
             </div>
           )}
