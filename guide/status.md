@@ -22,5 +22,9 @@
 - 전화번호 클릭 복사 (email과 동일)
 - WeightEditorModal 슬라이더 max 45pt
 
+## 완료된 주요 기능 (2026-04-02 추가)
+- 점수 분포 차트 Y축 제거 + 타이틀 "등록된 연락처 점수 분포"로 변경
+- 우측 패널 스크롤 유도 absolute+opacity transition (덜걱 수정)
+
 ## 미완료 / 다음 후보
 - 없음

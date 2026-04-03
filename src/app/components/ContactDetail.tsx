@@ -5,6 +5,7 @@ import { TYPE_COLORS, FLAGS, SHOWS, SHOW_GROUPS, SHOW_WEIGHTS } from '../lib/dat
 import { Mail, Globe, Phone, MousePointerClick, TrendingUp, User, Building2, Crosshair, ChevronDown, ChevronUp, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { ImageWithFallback } from './figma/ImageWithFallback';
 
 // ── 업종 라벨 ──────────────────────────────────────────────────────────────
 const INDUSTRY_LABELS: Record<string, string> = {
@@ -353,19 +354,6 @@ interface Props {
 }
 
 export function ContactDetail({ contact, selectedEvent, contacts, scoreVersion }: Props) {
-  const [localSeries, setLocalSeries] = useState('');
-
-  useEffect(() => {
-    if (selectedEvent.startsWith('cat_')) {
-      const g = SHOW_GROUPS.find(gr => gr.key === selectedEvent);
-      const first = g?.shows.find(k => SHOWS[k]) ?? '';
-      setLocalSeries(first);
-    }
-  }, [selectedEvent]);
-
-  const effectiveEventId = selectedEvent.startsWith('cat_') ? localSeries : selectedEvent;
-  void effectiveEventId;
-
   const classifyResult = useMemo(() => {
     if (!contact) return null;
     return classifyContact(contact, selectedEvent);
@@ -453,12 +441,12 @@ export function ContactDetail({ contact, selectedEvent, contacts, scoreVersion }
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2 text-gray-500">
                 <TrendingUp className="w-5 h-5" />
-                <span className="text-sm font-bold text-gray-700">점수 분포</span>
+                <span className="text-sm font-bold text-gray-700">등록된 연락처 점수 분포</span>
               </div>
               <div className="text-sm text-gray-400">{selectedEventLabel}</div>
             </div>
             <ResponsiveContainer width="100%" height={160}>
-              <AreaChart data={scoreData} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
+              <AreaChart data={scoreData} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
                 <defs>
                   <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#10B981" stopOpacity={0.25} />
@@ -471,13 +459,7 @@ export function ContactDetail({ contact, selectedEvent, contacts, scoreVersion }
                   axisLine={false}
                   tickLine={false}
                 />
-                <YAxis
-                  tick={{ fontSize: 14, fill: '#9CA3AF' }}
-                  axisLine={false}
-                  tickLine={false}
-                  allowDecimals={false}
-                  width={28}
-                />
+                <YAxis hide />
                 <Tooltip
                   contentStyle={{ fontSize: 16, borderRadius: 8, border: '1px solid #e5e7eb', padding: '4px 10px' }}
                   formatter={(v: number) => [`${v}명`, '인원']}
@@ -577,11 +559,12 @@ export function ContactDetail({ contact, selectedEvent, contacts, scoreVersion }
         </div>
 
           {/* 스크롤 유도 */}
-          {!isEmptyAtBottom && (
-            <div className="pointer-events-none absolute bottom-0 inset-x-0 h-20 bg-gradient-to-t from-gray-200/80 to-transparent flex items-end justify-center pb-2">
-              <ChevronDown className="w-7 h-7 text-gray-400 animate-bounce" />
-            </div>
-          )}
+          <div
+            className="pointer-events-none absolute bottom-0 inset-x-0 h-20 bg-gradient-to-t from-gray-200/80 to-transparent flex items-end justify-center pb-2 transition-opacity duration-300"
+            style={{ opacity: isEmptyAtBottom ? 0 : 1 }}
+          >
+            <ChevronDown className="w-7 h-7 text-gray-400 animate-bounce" />
+          </div>
       </div>
     );
   }
@@ -621,7 +604,7 @@ export function ContactDetail({ contact, selectedEvent, contacts, scoreVersion }
           {/* 이미지 / 아바타 영역 */}
           <div className="flex-1 min-h-[180px] flex items-center justify-center bg-gray-50 border-b border-gray-100">
             {contact.image_url ? (
-              <img
+              <ImageWithFallback
                 src={contact.image_url}
                 alt={contact.name}
                 className="w-full h-full object-contain bg-gray-50"
