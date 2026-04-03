@@ -417,13 +417,14 @@ export function ContactDetail({ contact, selectedEvent, contacts, scoreVersion }
   // ── 빈 상태 ──────────────────────────────────────────────────────────────
   if (!contact || !classifyResult) {
     return (
-      <div
-        className="flex-1 overflow-y-auto bg-gray-50 relative"
-        onScroll={e => {
-          const el = e.currentTarget;
-          setIsEmptyAtBottom(el.scrollTop + el.clientHeight >= el.scrollHeight - 20);
-        }}
-      >
+      <div className="flex-1 bg-gray-50 relative flex flex-col min-h-0">
+        <div
+          className="flex-1 overflow-y-auto"
+          onScroll={e => {
+            const el = e.currentTarget;
+            setIsEmptyAtBottom(el.scrollTop + el.clientHeight >= el.scrollHeight - 20);
+          }}
+        >
         <div className="space-y-4 max-w-3xl mx-auto pb-8">
 
           {/* 1) 온보딩 — 박스 없음 */}
@@ -557,14 +558,15 @@ export function ContactDetail({ contact, selectedEvent, contacts, scoreVersion }
           </div>
 
         </div>
+        </div>
 
-          {/* 스크롤 유도 */}
-          <div
-            className="pointer-events-none absolute bottom-0 inset-x-0 h-20 bg-gradient-to-t from-gray-200/80 to-transparent flex items-end justify-center pb-2 transition-opacity duration-300"
-            style={{ opacity: isEmptyAtBottom ? 0 : 1 }}
-          >
-            <ChevronDown className="w-7 h-7 text-gray-400 animate-bounce" />
-          </div>
+        {/* 스크롤 유도 */}
+        <div
+          className="pointer-events-none absolute bottom-0 inset-x-0 h-20 bg-gradient-to-t from-gray-200/80 to-transparent flex items-end justify-center pb-2 transition-opacity duration-300"
+          style={{ opacity: isEmptyAtBottom ? 0 : 1 }}
+        >
+          <ChevronDown className="w-7 h-7 text-gray-400 animate-bounce" />
+        </div>
       </div>
     );
   }
